@@ -71,6 +71,15 @@ resources:
       backupConfiguration:
         binaryLogEnabled: true
         enabled: true
+      databaseFlags:
+      - name: long_query_time
+        value: 5
+      - name: slow_query_log
+        value: 1
+      - name: character_set_server
+        value: utf8
+      - name: max_allowed_packet
+        value: 16777216
 
 - name: {{ BASE_NAME }}-db-user
   type: gcp-types/sqladmin-v1beta4:users
