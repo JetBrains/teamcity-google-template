@@ -225,7 +225,8 @@ resources:
                 [Service]
                 Type=oneshot
                 ExecStart=/bin/mkdir -p /mnt/data/teamcity-server/data/plugins
-                ExecStart=/bin/curl https://raw.githubusercontent.com/JetBrains/teamcity-azure-template/master/azure-plugins.txt -o /mnt/data/teamcity-server/data/plugins/google-plugins.txt
+                ExecStart=/bin/curl https://raw.githubusercontent.com/dtretyakov/teamcity-google-template/master/google-plugins.txt \
+                  -o /mnt/data/teamcity-server/data/plugins/google-plugins.txt
                 ExecStart=/bin/bash -c 'cd /mnt/data/teamcity-server/data/plugins && curl -K google-plugins.txt'
 
                 [Install]

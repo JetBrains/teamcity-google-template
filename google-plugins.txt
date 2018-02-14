@@ -1,0 +1,7 @@
+# Google Cloud Agents
+url = "https://teamcity.jetbrains.com/app/rest/builds/buildType:(id:TeamCityGoogleCloudAgent_Build),tag:deploy,branch:default:any/artifacts/content/cloud-google.zip?guest=1"
+output = "cloud-google.zip"
+
+# Goole Cloud Storage
+url = "https://teamcity.jetbrains.com/app/rest/builds/buildType:(id:TeamCityPluginsByJetBrains_TeamcityGoogleStorage_Build),tag:release,branch:default:any/artifacts/content/google-artifact-storage.zip?guest=1"
+output = "google-artifact-storage.zip"
