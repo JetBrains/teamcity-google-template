@@ -268,7 +268,7 @@ resources:
                   -p 80:8111 \
                   --name teamcity-server \
                   jetbrains/teamcity-server:${TEAMCITY_VERSION}
-                ExecStartPre=/bin/sh -c "echo 'google' > dist && docker cp dist teamcity-server:/opt/teamcity/webapps/ROOT/WEB-INF/DistributionType.txt && rm dist"
+                ExecStartPre=/bin/sh -c "echo 'gcp' > dist && docker cp dist teamcity-server:/opt/teamcity/webapps/ROOT/WEB-INF/DistributionType.txt && rm dist"
                 ExecStart=/usr/bin/docker start teamcity-server -a
                 ExecStop=-/usr/bin/docker exec teamcity-server /opt/teamcity/bin/teamcity-server.sh stop 60
                 ExecStopPost=-/usr/bin/docker stop teamcity-server
