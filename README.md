@@ -19,3 +19,7 @@ Or after editing `teamcity.yaml` config file via following command:
 ```
 
 Deployment will take several minutes, on completion you could navigate to the `teamcityUrl` output value to see TeamCity UI.
+
+## Required Google Cloud APIs
+
+* Enable [Cloud SQL Administration API](https://console.developers.google.com/apis/api/sqladmin.googleapis.com/overview)
