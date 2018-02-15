@@ -23,3 +23,4 @@ Deployment will take several minutes, on completion you could navigate to the `t
 ## Required Google Cloud APIs
 
 * Enable [Cloud SQL Administration API](https://console.developers.google.com/apis/api/sqladmin.googleapis.com/overview)
+* Enable [Identity and Access Management (IAM) API](https://console.developers.google.com/apis/api/iam.googleapis.com/overview)
