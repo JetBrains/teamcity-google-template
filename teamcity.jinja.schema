@@ -26,13 +26,13 @@ info:
 
 required:
   - zone
-  - teamcityVersion
+  - version
 
 properties:
   zone:
     description: Zone in which this deployment will run
     type: string
-  teamcityVersion:
+  version:
     description: The version of TeamCity
     type: string
 

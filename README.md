@@ -10,7 +10,7 @@ For that copy the repository:
 
 And deploy it by specifying template properties:
 ```
-> gcloud deployment-manager deployments create test --template teamcity.jinja --properties zone:us-central1-a,teamcityVersion:2017.2.2
+> gcloud deployment-manager deployments create test --template teamcity.jinja --properties zone:us-central1-a,version:2017.2.2
 ```
 
 Or after editing `teamcity.yaml` config file via following command:
