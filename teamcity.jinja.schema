@@ -19,13 +19,23 @@ imports:
 - path: teamcity.jinja
 - path: virtual-machine.jinja
 
-resources:
-- name: teamcity
-  type: teamcity.jinja
-  properties:
-    zone: europe-west3-c
-    version: 2017.2.2
+info:
+  title: TeamCity Template
+  author: JetBrains s.r.o.
+  description: Creates a TeamCity server and build agent.
+
+required:
+  - zone
+  - teamcityVersion
+
+properties:
+  zone:
+    description: Zone in which this deployment will run
+    type: string
+  teamcityVersion:
+    description: The version of TeamCity
+    type: string
 
 outputs:
-- name: teamcityUrl
-  value: $(ref.teamcity.teamcityUrl)
+  teamcityUrl:
+    type: string

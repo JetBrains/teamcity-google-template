@@ -1,0 +1,256 @@
+{#
+Copyright 2000-2018 JetBrains s.r.o.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+#}
+
+{% set COMPUTE_URL_BASE = 'https://www.googleapis.com/compute/v1/' %}
+{% set BASE_NAME = env['deployment'] + '-' + env['name'] %}
+{% set REGION = properties['zone'][0:properties['zone'].rindex('-')] %}
+{% set GOOGLE_FACTORY = '1.0.5' %}
+
+{% macro GlobalComputeUrl(project, collection, name) -%}
+{{ COMPUTE_URL_BASE }}projects/{{ project }}/global/{{ collection }}/{{ name }}
+{%- endmacro %}
+
+{% macro ZonalComputeUrl(project, zone, collection, name) -%}
+{{ COMPUTE_URL_BASE }}projects/{{ project }}/zones/{{ zone }}/{{ collection }}/{{ name }}
+{%- endmacro %}
+
+{% macro SqlInstanceName(project, region, dbName) -%}
+{{ project }}:{{ region }}:{{ dbName }}
+{%- endmacro %}
+
+resources:
+- name: {{ BASE_NAME }}-data
+  type: compute.v1.disk
+  properties:
+    zone: {{ properties["zone"] }}
+    sizeGb: 20
+    type: {{ ZonalComputeUrl(env['project'], properties['zone'], 'diskTypes', 'pd-standard') }}
+
+- name: {{ BASE_NAME }}
+  type: compute.v1.instance
+  properties:
+    zone: {{ properties['zone'] }}
+    machineType: {{ ZonalComputeUrl(env['project'], properties['zone'], 'machineTypes', 'n1-standard-1') }}
+    serviceAccounts:
+    - scopes:
+      - "https://www.googleapis.com/auth/cloud-platform"
+    metadata:
+      items:
+      - key: user-data
+        value: |
+          #cloud-config
+          write_files:
+          - path: "/etc/teamcity/version"
+            content: |
+              TEAMCITY_VERSION={{ properties['teamcityVersion'] }}
+          - path: "/etc/teamcity/database.properties"
+            content: |
+              connectionProperties.user={{ properties['databaseUser'] }}
+              connectionUrl=jdbc:mysql://google/{{ properties['databaseName'] }}?cloudSqlInstance={{ env['project'] }}:{{ REGION }}:{{ properties['databaseInstance'] }}&socketFactory=com.google.cloud.sql.mysql.SocketFactory
+          - path: "/etc/teamcity/disabled-plugins.xml"
+            content: |
+              <?xml version="1.0" encoding="UTF-8"?>
+              <disabled-plugins>
+                <disabled-plugin name="cloud-amazon" />
+                <disabled-plugin name="vsphere" />
+              </disabled-plugins>
+          - path: "/etc/coreos/update.conf"
+            content: |
+              REBOOT_STRATEGY="off"
+          coreos:
+            units:
+            - name: "format-mnt-data.service"
+              enable: true
+              content: |
+                [Unit]
+                Requires=network-online.target
+                Before=teamcity-server.service mnt-data.mount
+                ConditionPathExists=!/dev/mapper/app-data
+
+                [Service]
+                Type=oneshot
+                ExecStart=/bin/bash -c \
+                  '/usr/sbin/pvcreate /dev/disk/by-id/google-{{ BASE_NAME }}-data && \
+                  /usr/sbin/vgcreate app /dev/disk/by-id/google-{{ BASE_NAME }}-data && \
+                  /usr/sbin/lvcreate -l 100%FREE -n data app && \
+                  /usr/sbin/mkfs.ext4 /dev/mapper/app-data'
+
+                [Install]
+                WantedBy=multi-user.target
+
+            - name: "mnt-data.mount"
+              enable: true
+              content: |
+                [Unit]
+                Before=teamcity-server.service
+                After=format-mnt-data.service
+                Requires=format-mnt-data.service
+                ConditionVirtualization=!container
+                Conflicts=umount.target
+
+                [Mount]
+                What=/dev/mapper/app-data
+                Where=/mnt/data
+                Type=ext4
+                Options=
+
+                [Install]
+                RequiredBy=teamcity-server.service
+
+            - name: "get-mysql-connector.service"
+              enable: true
+              content: |
+                [Unit]
+                Before=teamcity-server.service
+                After=mnt-data.mount docker.service
+                Requires=mnt-data.mount docker.service
+                ConditionPathExists=!/mnt/data/teamcity-server/data/lib/jdbc/
+
+                [Service]
+                Type=oneshot
+                ExecStart=/bin/mkdir -p /mnt/data/teamcity-server/data/lib/jdbc
+                ExecStart=/bin/wget -O /mnt/data/teamcity-server/data/lib/jdbc/mysql-socket-factory.jar \
+                  http://central.maven.org/maven2/com/google/cloud/sql/mysql-socket-factory/{{ GOOGLE_FACTORY }}/mysql-socket-factory-{{ GOOGLE_FACTORY }}.jar
+                ExecStart=/bin/wget -O pom.xml http://central.maven.org/maven2/com/google/cloud/sql/mysql-socket-factory/{{ GOOGLE_FACTORY }}/mysql-socket-factory-{{ GOOGLE_FACTORY }}.pom
+                ExecStart=/bin/bash -c 'docker run --rm -v "$(pwd)":/opt/maven -v /mnt/data/teamcity-server/data/lib/jdbc:/opt/maven/target/dependency -w /opt/maven maven:alpine mvn dependency:copy-dependencies && docker rmi maven:alpine'
+                ExecStart=/bin/rm pom.xml
+
+                [Install]
+                WantedBy=multi-user.target
+{% raw %}
+            - name: "get-google-plugins.service"
+              enable: true
+              content: |
+                [Unit]
+                Before=teamcity-server.service
+                After=mnt-data.mount
+                Requires=mnt-data.mount
+                ConditionPathExists=!/mnt/data/teamcity-server/data/plugins/google-plugins.txt
+
+                [Service]
+                Type=oneshot
+                ExecStart=/bin/mkdir -p /mnt/data/teamcity-server/data/plugins
+                ExecStart=/bin/curl https://raw.githubusercontent.com/dtretyakov/teamcity-google-template/master/google-plugins.txt \
+                  -o /mnt/data/teamcity-server/data/plugins/google-plugins.txt
+                ExecStart=/bin/bash -c 'cd /mnt/data/teamcity-server/data/plugins && curl -K google-plugins.txt'
+
+                [Install]
+                WantedBy=multi-user.target
+
+            - name: "prepare-config.service"
+              enable: true
+              content: |
+                [Unit]
+                Before=teamcity-server.service
+                After=mnt-data.mount
+                Requires=mnt-data.mount network-online.target
+                ConditionPathExists=!/mnt/data/teamcity-server/data/config
+
+                [Service]
+                Type=oneshot
+                ExecStart=/bin/mkdir -p /mnt/data/teamcity-server/data/config
+                ExecStart=/bin/mv /etc/teamcity/database.properties /mnt/data/teamcity-server/data/config/
+                ExecStart=/bin/mv /etc/teamcity/disabled-plugins.xml /mnt/data/teamcity-server/data/config/
+
+                [Install]
+                WantedBy=multi-user.target
+
+            - name: "teamcity-server.service"
+              command: "start"
+              content: |
+                [Unit]
+                Description=TeamCity Server
+                After=docker.service mnt-data.mount get-mysql-connector.service get-google-plugins.service prepare-config.service
+                Requires=docker.service mnt-data.mount get-mysql-connector.service get-google-plugins.service prepare-config.service
+
+                [Service]
+                EnvironmentFile=/etc/teamcity/version
+                TimeoutStartSec=1200s
+                ExecStartPre=/bin/sh -c "docker images --filter 'before=jetbrains/teamcity-server:${TEAMCITY_VERSION}' --format '{{.ID}} {{.Repository}}' | grep 'jetbrains/teamcity-server' | grep -Eo '^[^ ]+' | xargs -r docker rmi"
+                ExecStartPre=/usr/bin/docker create \
+                  -e TEAMCITY_SERVER_MEM_OPTS="-Xmx$(($(grep MemTotal /proc/meminfo | awk '{print $2}') / 2))k -XX:MaxPermSize=270m -XX:ReservedCodeCacheSize=350m" \
+                  -v /mnt/data/teamcity-server/data:/data/teamcity_server/datadir \
+                  -v /mnt/data/teamcity-server/logs:/opt/teamcity/logs \
+                  -v /mnt/resource/teamcity-server/temp:/opt/teamcity/temp \
+                  -p 80:8111 \
+                  --name teamcity-server \
+                  jetbrains/teamcity-server:${TEAMCITY_VERSION}
+                ExecStartPre=/bin/sh -c "echo 'gcp' > dist && docker cp dist teamcity-server:/opt/teamcity/webapps/ROOT/WEB-INF/DistributionType.txt && rm dist"
+                ExecStart=/usr/bin/docker start teamcity-server -a
+                ExecStop=-/usr/bin/docker exec teamcity-server /opt/teamcity/bin/teamcity-server.sh stop 60
+                ExecStopPost=-/usr/bin/docker stop teamcity-server
+                ExecStopPost=-/usr/bin/docker rm teamcity-server
+                Restart=always
+
+                [Install]
+                WantedBy=multi-user.target
+
+            - name: "teamcity-agent.service"
+              command: "start"
+              content: |
+                [Unit]
+                Description=TeamCity Agent
+                After=teamcity-server.service coreos-metadata.service
+                Requires=teamcity-server.service coreos-metadata.service
+
+                [Service]
+                EnvironmentFile=/etc/teamcity/version
+                TimeoutStartSec=1200s
+                EnvironmentFile=/run/metadata/coreos
+                ExecStartPre=/bin/sh -c "docker images --filter 'before=jetbrains/teamcity-agent:${TEAMCITY_VERSION}' --format '{{.ID}} {{.Repository}}' | grep 'jetbrains/teamcity-agent' | grep -Eo '^[^ ]+' | xargs -r docker rmi" %}
+                ExecStart=/usr/bin/docker run \
+                  -v /mnt/data/teamcity-agent/logs:/opt/buildagent/logs \
+                  -v /mnt/data/teamcity-agent/plugins:/opt/buildagent/plugins \
+                  -v /mnt/data/teamcity-agent/system:/opt/buildagent/system \
+                  -v /mnt/resource/teamcity-agent/temp:/opt/buildagent/temp \
+                  -v /mnt/resource/teamcity-server/temp:/opt/teamcity/temp \
+                  -v /mnt/data/teamcity-agent/tools:/opt/buildagent/tools \
+                  -e SERVER_URL=${COREOS_GCE_HOSTNAME} \
+                  -e AGENT_NAME=Default \
+                  --name teamcity-agent \
+                  jetbrains/teamcity-agent:${TEAMCITY_VERSION}
+                ExecStop=-/usr/bin/docker exec teamcity-agent /opt/buildagent/bin/agent.sh stop
+                ExecStopPost=-/usr/bin/docker stop teamcity-agent
+                ExecStopPost=-/usr/bin/docker rm teamcity-agent
+                Restart=always
+
+                [Install]
+                WantedBy=multi-user.target
+{% endraw %}
+    disks:
+      - deviceName: boot
+        type: PERSISTENT
+        autoDelete: true
+        boot: true
+        initializeParams:
+          diskName: {{ BASE_NAME }}-disk
+          sourceImage: {{ GlobalComputeUrl('coreos-cloud', 'images', 'family/coreos-stable') }}
+      - deviceName: {{ BASE_NAME }}-data
+        type: PERSISTENT
+        autoDelete: true
+        source: $(ref.{{ BASE_NAME }}-data.selfLink)
+    networkInterfaces:
+      - accessConfigs:
+        - name: external-nat
+          type: ONE_TO_ONE_NAT
+        network: {{ properties['network'] }}
+    tags:
+      items:
+        - http-server
+        - ssh-server
+
+outputs:
+  - name: ip
+    value: $(ref.{{ BASE_NAME }}.networkInterfaces[0].accessConfigs[0].natIP)
