@@ -1,0 +1,79 @@
+{#
+Copyright 2000-2018 JetBrains s.r.o.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+#}
+
+{% set BASE_NAME = env['deployment'] + '-' + env['name'] %}
+{% set REGION = properties['zone'][0:properties['zone'].rindex('-')] %}
+{% set TEAMCITY_DB = 'teamcitydb' %}
+{% set TEAMCITY_USER = 'teamcity' %}
+
+resources:
+- name: {{ BASE_NAME }}
+  type: gcp-types/sqladmin-v1beta4:instances
+  properties:
+    region: {{ REGION }}
+    settings:
+      tier: db-n1-standard-1
+      backupConfiguration:
+        binaryLogEnabled: true
+        enabled: true
+      databaseFlags:
+      - name: long_query_time
+        value: 5
+      - name: slow_query_log
+        value: 1
+      - name: character_set_server
+        value: utf8
+      - name: max_allowed_packet
+        value: 16777216
+
+- name: create-user
+  type: gcp-types/sqladmin-v1beta4:users
+  metadata:
+    dependsOn:
+    - {{ BASE_NAME }}
+  properties:
+    name: {{ TEAMCITY_USER }}
+    instance: $(ref.{{ BASE_NAME }}.name)
+    host: "cloudsqlproxy~%"
+
+- name: create-database
+  type: gcp-types/sqladmin-v1beta4:databases
+  metadata:
+    dependsOn:
+    - create-user
+  properties:
+    name: {{ TEAMCITY_DB }}
+    instance: $(ref.{{ BASE_NAME }}.name)
+    charset: utf8
+
+- name: delete-root-user
+  action: gcp-types/sqladmin-v1beta4:sql.users.delete
+  metadata:
+    runtimePolicy:
+    - CREATE
+    dependsOn:
+    - create-database
+  properties:
+    name: root
+    instance: $(ref.{{ BASE_NAME }}.name)
+    host: "%"
+
+outputs:
+- name: instance
+  value: $(ref.{{ BASE_NAME }}.name)
+- name: name
+  value: $(ref.create-database.name)
+- name: user
+  value: {{ TEAMCITY_USER }}

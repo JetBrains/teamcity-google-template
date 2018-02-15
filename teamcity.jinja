@@ -16,8 +16,6 @@ limitations under the License.
 {% set COMPUTE_URL_BASE = 'https://www.googleapis.com/compute/v1/' %}
 {% set BASE_NAME = env['deployment'] + '-' + env['name'] %}
 {% set REGION = properties['zone'][0:properties['zone'].rindex('-')] %}
-{% set TEAMCITY_DB = 'teamcitydb' %}
-{% set TEAMCITY_USER = 'teamcity' %}
 {% set GOOGLE_FACTORY = '1.0.5' %}
 
 {% macro GlobalComputeUrl(project, collection, name) -%}
@@ -33,86 +31,6 @@ limitations under the License.
 {%- endmacro %}
 
 resources:
-- name: {{ BASE_NAME }}-network
-  type: compute.v1.network
-  properties:
-    IPv4Range: 10.240.0.0/16
-
-- name: allow-http
-  type: compute.v1.firewall
-  properties:
-    network: $(ref.{{ BASE_NAME }}-network.selfLink)
-    priority: 1000
-    sourceRanges: ["0.0.0.0/0"]
-    allowed:
-    - IPProtocol: TCP
-      ports: ["80"]
-    targetTags:
-    - http-server
-
-- name: allow-ssh
-  type: compute.v1.firewall
-  properties:
-    network: $(ref.{{ BASE_NAME }}-network.selfLink)
-    priority: 65534
-    sourceRanges: ["0.0.0.0/0"]
-    allowed:
-    - IPProtocol: TCP
-      ports: ["22"]
-    targetTags:
-    - ssh-server
-
-- name: {{ BASE_NAME }}-db
-  type: gcp-types/sqladmin-v1beta4:instances
-  properties:
-    region: {{ REGION }}
-    settings:
-      tier: db-n1-standard-1
-      backupConfiguration:
-        binaryLogEnabled: true
-        enabled: true
-      databaseFlags:
-      - name: long_query_time
-        value: 5
-      - name: slow_query_log
-        value: 1
-      - name: character_set_server
-        value: utf8
-      - name: max_allowed_packet
-        value: 16777216
-
-- name: {{ BASE_NAME }}-db-user
-  type: gcp-types/sqladmin-v1beta4:users
-  metadata:
-    dependsOn:
-    - {{ BASE_NAME }}-db
-  properties:
-    name: {{ TEAMCITY_USER }}
-    instance: $(ref.{{ BASE_NAME }}-db.name)
-    host: "cloudsqlproxy~%"
-
-- name: delete-user-root
-  action: gcp-types/sqladmin-v1beta4:sql.users.delete
-  metadata:
-    runtimePolicy:
-    - CREATE
-    dependsOn:
-    - {{ BASE_NAME }}-db-user
-  properties:
-    name: root
-    instance: $(ref.{{ BASE_NAME }}-db.name)
-    host: "%"
-
-- name: {{ BASE_NAME }}-db-schema
-  type: gcp-types/sqladmin-v1beta4:databases
-  metadata:
-    dependsOn:
-    - delete-user-root
-  properties:
-    name: {{ TEAMCITY_DB }}
-    instance: $(ref.{{ BASE_NAME }}-db.name)
-    charset: utf8
-
 - name: {{ BASE_NAME }}-data
   type: compute.v1.disk
   properties:
@@ -126,12 +44,9 @@ resources:
     zone: {{ properties['zone'] }}
     machineType: {{ ZonalComputeUrl(env['project'], properties['zone'], 'machineTypes', 'n1-standard-1') }}
     serviceAccounts:
-      - scopes:
-        - https://www.googleapis.com/auth/sqlservice.admin
+    - scopes:
+      - "https://www.googleapis.com/auth/cloud-platform"
     metadata:
-      dependsOn:
-      - {{ BASE_NAME }}-data
-      - {{ BASE_NAME }}-db-schema
       items:
       - key: user-data
         value: |
@@ -139,11 +54,11 @@ resources:
           write_files:
           - path: "/etc/teamcity/version"
             content: |
-              TEAMCITY_VERSION={{ properties['teamcity-version'] }}
+              TEAMCITY_VERSION={{ properties['version'] }}
           - path: "/etc/teamcity/database.properties"
             content: |
-              connectionProperties.user={{ TEAMCITY_USER }}
-              connectionUrl=jdbc:mysql://google/{{ TEAMCITY_DB }}?cloudSqlInstance={{ env['project'] }}:{{ REGION }}:{{ BASE_NAME }}-db&socketFactory=com.google.cloud.sql.mysql.SocketFactory
+              connectionProperties.user={{ properties['databaseUser'] }}
+              connectionUrl=jdbc:mysql://google/{{ properties['databaseName'] }}?cloudSqlInstance={{ env['project'] }}:{{ REGION }}:{{ properties['databaseInstance'] }}&socketFactory=com.google.cloud.sql.mysql.SocketFactory
           - path: "/etc/teamcity/disabled-plugins.xml"
             content: |
               <?xml version="1.0" encoding="UTF-8"?>
@@ -174,6 +89,7 @@ resources:
 
                 [Install]
                 WantedBy=multi-user.target
+
             - name: "mnt-data.mount"
               enable: true
               content: |
@@ -192,6 +108,7 @@ resources:
 
                 [Install]
                 RequiredBy=teamcity-server.service
+
             - name: "get-mysql-connector.service"
               enable: true
               content: |
@@ -231,6 +148,7 @@ resources:
 
                 [Install]
                 WantedBy=multi-user.target
+
             - name: "prepare-config.service"
               enable: true
               content: |
@@ -248,6 +166,7 @@ resources:
 
                 [Install]
                 WantedBy=multi-user.target
+
             - name: "teamcity-server.service"
               command: "start"
               content: |
@@ -277,6 +196,7 @@ resources:
 
                 [Install]
                 WantedBy=multi-user.target
+
             - name: "teamcity-agent.service"
               command: "start"
               content: |
@@ -325,12 +245,12 @@ resources:
       - accessConfigs:
         - name: external-nat
           type: ONE_TO_ONE_NAT
-        network: $(ref.{{ BASE_NAME }}-network.selfLink)
+        network: {{ properties['network'] }}
     tags:
       items:
         - http-server
         - ssh-server
 
 outputs:
-  - name: teamcity-url,
-    value: http://$(ref.{{ BASE_NAME }}.networkInterfaces[0].accessConfigs[0].natIP)/
+  - name: ip
+    value: $(ref.{{ BASE_NAME }}.networkInterfaces[0].accessConfigs[0].natIP)

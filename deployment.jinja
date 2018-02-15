@@ -1,0 +1,38 @@
+{#
+Copyright 2000-2018 JetBrains s.r.o.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+#}
+
+resources:
+- name: database
+  type: database.jinja
+  properties:
+    zone: {{ properties['zone'] }}
+- name: network
+  type: network.jinja
+- name: service-account
+  type: service-account.jinja
+- name: teamcity
+  type: teamcity.jinja
+  properties:
+    zone: {{ properties['zone'] }}
+    version: {{ properties['teamcityVersion'] }}
+    serviceAccount: $(ref.service-account.email)
+    network: $(ref.network.selfLink)
+    databaseInstance: $(ref.database.instance)
+    databaseName: $(ref.database.name)
+    databaseUser: $(ref.database.user)
+
+outputs:
+- name: teamcityIp
+  value: $(ref.teamcity.ip)

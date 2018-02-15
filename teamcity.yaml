@@ -13,11 +13,19 @@
 # limitations under the License.
 
 imports:
+- path: database.jinja
+- path: deployment.jinja
+- path: network.jinja
+- path: service-account.jinja
 - path: teamcity.jinja
 
 resources:
-  - name: teamcity
-    type: teamcity.jinja
-    properties:
-      zone: europe-west3-c
-      teamcity-version: 2017.2.2
+- name: deployment
+  type: deployment.jinja
+  properties:
+    zone: europe-west3-c
+    teamcityVersion: 2017.2.2
+
+outputs:
+- name: teamcityUrl
+  value: http://$(ref.deployment.teamcityIp)/
