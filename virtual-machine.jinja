@@ -15,8 +15,23 @@ limitations under the License.
 
 {% set COMPUTE_URL_BASE = 'https://www.googleapis.com/compute/v1/' %}
 {% set BASE_NAME = env['deployment'] + '-' + env['name'] %}
-{% set REGION = properties['zone'][0:properties['zone'].rindex('-')] %}
+{% set REGION = properties['zone'][:-2] %}
+{% set DISK_SIZE = properties['zone'][:-2] %}
 {% set GOOGLE_FACTORY = '1.0.5' %}
+
+{% if properties['size'] == 'small' %}
+  {% set DISK_SIZE = 10 %}
+  {% set DISK_TYPE = 'pd-standard' %}
+  {% set MACHINE_TYPE = 'n1-standard-1' %}
+{% elif properties['size'] == 'large' %}
+  {% set DISK_SIZE = 40 %}
+  {% set DISK_TYPE = 'pd-ssd' %}
+  {% set MACHINE_TYPE = 'n1-highcpu-4' %}
+{% else %}
+  {% set DISK_SIZE = 20 %}
+  {% set DISK_TYPE = 'pd-ssd' %}
+  {% set MACHINE_TYPE = 'n1-highcpu-2' %}
+{% endif %}
 
 {% macro GlobalComputeUrl(project, collection, name) -%}
 {{ COMPUTE_URL_BASE }}projects/{{ project }}/global/{{ collection }}/{{ name }}
@@ -35,16 +50,17 @@ resources:
   type: compute.v1.disk
   properties:
     zone: {{ properties["zone"] }}
-    sizeGb: 20
-    type: {{ ZonalComputeUrl(env['project'], properties['zone'], 'diskTypes', 'pd-standard') }}
+    sizeGb: {{ DISK_SIZE }}
+    type: {{ ZonalComputeUrl(env['project'], properties['zone'], 'diskTypes', DISK_TYPE) }}
 
 - name: {{ BASE_NAME }}
   type: compute.v1.instance
   properties:
     zone: {{ properties['zone'] }}
-    machineType: {{ ZonalComputeUrl(env['project'], properties['zone'], 'machineTypes', 'n1-standard-1') }}
+    machineType: {{ ZonalComputeUrl(env['project'], properties['zone'], 'machineTypes', MACHINE_TYPE) }}
     serviceAccounts:
-    - scopes:
+    - email: {{ properties['serviceAccount'] }}
+      scopes:
       - "https://www.googleapis.com/auth/cloud-platform"
     metadata:
       items:
@@ -57,8 +73,8 @@ resources:
               TEAMCITY_VERSION={{ properties['teamcityVersion'] }}
           - path: "/etc/teamcity/database.properties"
             content: |
-              connectionProperties.user={{ properties['databaseUser'] }}
-              connectionUrl=jdbc:mysql://google/{{ properties['databaseName'] }}?cloudSqlInstance={{ env['project'] }}:{{ REGION }}:{{ properties['databaseInstance'] }}&socketFactory=com.google.cloud.sql.mysql.SocketFactory
+              connectionProperties.user={{ properties['database']['user'] }}
+              connectionUrl=jdbc:mysql://google/{{ properties['database']['name'] }}?cloudSqlInstance={{ env['project'] }}:{{ REGION }}:{{ properties['database']['instance'] }}&socketFactory=com.google.cloud.sql.mysql.SocketFactory
           - path: "/etc/teamcity/disabled-plugins.xml"
             content: |
               <?xml version="1.0" encoding="UTF-8"?>

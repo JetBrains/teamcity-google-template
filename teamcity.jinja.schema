@@ -15,7 +15,6 @@
 imports:
 - path: database.jinja
 - path: network.jinja
-- path: service-account.jinja
 - path: teamcity.jinja
 - path: virtual-machine.jinja
 
@@ -24,17 +23,25 @@ info:
   author: JetBrains s.r.o.
   description: Creates a TeamCity server and build agent.
 
-required:
-  - zone
-  - version
-
 properties:
   zone:
     description: Zone in which this deployment will run
     type: string
+    default: us-central1-c
   version:
     description: The version of TeamCity
     type: string
+    pattern: ^\d+\.\d+.*$
+    default: 2017.2.2
+  installationSize:
+    description: The size of installation - small, medium or large
+    type: string
+    default: medium
+    pattern: ^(small|medium|large)$
+  serviceAccount:
+    description: The service account email
+    type: string
+    default: default
 
 outputs:
   teamcityUrl:

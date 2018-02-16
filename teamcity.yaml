@@ -15,7 +15,6 @@
 imports:
 - path: database.jinja
 - path: network.jinja
-- path: service-account.jinja
 - path: teamcity.jinja
 - path: virtual-machine.jinja
 
@@ -23,7 +22,7 @@ resources:
 - name: teamcity
   type: teamcity.jinja
   properties:
-    zone: europe-west3-c
+    zone: us-central1-c
     version: 2017.2.2
 
 outputs:

@@ -20,18 +20,18 @@ resources:
     zone: {{ properties['zone'] }}
 - name: network
   type: network.jinja
-- name: service-account
-  type: service-account.jinja
 - name: teamcity
   type: virtual-machine.jinja
   properties:
     zone: {{ properties['zone'] }}
     teamcityVersion: {{ properties['version'] }}
-    serviceAccount: $(ref.service-account.email)
     network: $(ref.network.selfLink)
-    databaseInstance: $(ref.database.instance)
-    databaseName: $(ref.database.name)
-    databaseUser: $(ref.database.user)
+    size: {{ properties['installationSize'] }}
+    serviceAccount: {{ properties['serviceAccount'] }}
+    database:
+      instance: $(ref.database.instance)
+      name: $(ref.database.name)
+      user: $(ref.database.user)
 
 outputs:
 - name: teamcityUrl
