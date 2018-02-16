@@ -18,6 +18,7 @@ resources:
   type: database.jinja
   properties:
     zone: {{ properties['zone'] }}
+    size: {{ properties['installationSize'] }}
 - name: network
   type: network.jinja
 - name: teamcity

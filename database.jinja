@@ -18,13 +18,19 @@ limitations under the License.
 {% set TEAMCITY_DB = 'teamcitydb' %}
 {% set TEAMCITY_USER = 'teamcity' %}
 
+{% if properties['size'] == 'large' %}
+  {% set DB_TIER = 'db-n1-standard-2' %}
+{% else %}
+  {% set DB_TIER = 'db-n1-standard-1' %}
+{% endif %}
+
 resources:
 - name: {{ BASE_NAME }}
   type: gcp-types/sqladmin-v1beta4:instances
   properties:
     region: {{ REGION }}
     settings:
-      tier: db-n1-standard-1
+      tier: {{ DB_TIER }}
       backupConfiguration:
         binaryLogEnabled: true
         enabled: true

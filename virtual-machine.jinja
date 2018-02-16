@@ -20,15 +20,15 @@ limitations under the License.
 {% set GOOGLE_FACTORY = '1.0.5' %}
 
 {% if properties['size'] == 'small' %}
-  {% set DISK_SIZE = 10 %}
+  {% set DISK_SIZE = 32 %}
   {% set DISK_TYPE = 'pd-standard' %}
   {% set MACHINE_TYPE = 'n1-standard-1' %}
 {% elif properties['size'] == 'large' %}
-  {% set DISK_SIZE = 40 %}
+  {% set DISK_SIZE = 128 %}
   {% set DISK_TYPE = 'pd-ssd' %}
   {% set MACHINE_TYPE = 'n1-highcpu-4' %}
 {% else %}
-  {% set DISK_SIZE = 20 %}
+  {% set DISK_SIZE = 64 %}
   {% set DISK_TYPE = 'pd-ssd' %}
   {% set MACHINE_TYPE = 'n1-highcpu-2' %}
 {% endif %}
