@@ -38,20 +38,20 @@ You could specify the following properties for deployment:
 
 List of pre-configured installation types:
 
-| Installation Size | Typical Usage             | Machine Type   | VM Data Disk | Database         |
-| ----------------- | ------------------------- | -------------- | ------------ | ---------------- |
-| Small             | 3 users, 100 builds/day   | n1-standard-1  | 32 GB HDD    | db-n1-standard-1 |
-| Medium            | 5 users, 300 builds/day   | n1-highcpu-2   | 64 GB SSD    | db-n1-standard-1 |
-| Large             | 20 users, 1000 builds/day | n1-highcpu-4   | 128 GB SSD   | db-n1-standard-2 |
+| Installation Size | Typical Usage             | vCPU | RAM  | VM Data Disk | Database         |
+| ----------------- | ------------------------- | ---- | ---- | ------------ | ---------------- |
+| Small             | 3 users, 100 builds/day   | 1    | 3 GB | 32 GB HDD    | db-n1-standard-1 |
+| Medium            | 5 users, 300 builds/day   | 2    | 4 GB | 64 GB SSD    | db-n1-standard-1 |
+| Large             | 20 users, 1000 builds/day | 4    | 8 GB | 128 GB SSD   | db-n1-standard-2 |
 
-**Note**: Pricing for [Google Compute Engine](https://cloud.google.com/compute/pricing) and [MySQL database](https://cloud.google.com/sql/docs/mysql/pricing).
+**Note**: Pricing for [Google Compute Engine](https://cloud.google.com/compute/pricing#custommachinetypepricing) and [MySQL database](https://cloud.google.com/sql/docs/mysql/pricing).
 
 ### Template
 
 Deploy TeamCity as a template by specifying properties:
 ```
 > gcloud deployment-manager deployments create test --template teamcity.jinja --properties \
-  zone:us-central1-a,version:2017.2.2,installationSize:medium,serviceAccount:account@my-project-123iam.gserviceaccount.com
+  zone:us-central1-a,version:2017.2.2,installationSize:medium,serviceAccount:account@my-project-123.iam.gserviceaccount.com
 ```
 
 ### Configuration

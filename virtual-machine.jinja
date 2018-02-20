@@ -22,15 +22,15 @@ limitations under the License.
 {% if properties['size'] == 'small' %}
   {% set DISK_SIZE = 32 %}
   {% set DISK_TYPE = 'pd-standard' %}
-  {% set MACHINE_TYPE = 'n1-standard-1' %}
+  {% set MACHINE_TYPE = 'custom-1-3072' %}
 {% elif properties['size'] == 'large' %}
   {% set DISK_SIZE = 128 %}
   {% set DISK_TYPE = 'pd-ssd' %}
-  {% set MACHINE_TYPE = 'n1-highcpu-4' %}
+  {% set MACHINE_TYPE = 'custom-4-8192' %}
 {% else %}
   {% set DISK_SIZE = 64 %}
   {% set DISK_TYPE = 'pd-ssd' %}
-  {% set MACHINE_TYPE = 'n1-highcpu-2' %}
+  {% set MACHINE_TYPE = 'custom-2-4096' %}
 {% endif %}
 
 {% macro GlobalComputeUrl(project, collection, name) -%}
