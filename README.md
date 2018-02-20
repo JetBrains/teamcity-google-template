@@ -74,7 +74,7 @@ After deployment you will be able to connect to the `teamcity` virtual machine v
 
 The template installs the following Google Cloud Platform integrations in TeamCity:
 
-* [Google Cloud Agents](https://plugins.jetbrains.com/plugin/9260-azure-resource-manager-cloud-support) - allows to scale the pool of TeamCity build agents by leveraging GCE.
+* [Google Cloud Agents](https://plugins.jetbrains.com/plugin/9704-google-cloud-agents) - allows to scale the pool of TeamCity build agents by leveraging GCE.
 * [Google Artifacts Storage](https://plugins.jetbrains.com/plugin/9634-google-artifact-storage) - allows to store build artifacts in Google Storage Blobs.
 
 ### Futher Steps
