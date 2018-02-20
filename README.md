@@ -14,7 +14,7 @@ Ensure that you have enabled following Google Cloud APIs in your project:
 
 If you don't have [Compute Engine default service account](https://cloud.google.com/compute/docs/access/service-accounts#compute_engine_default_service_account) in your project you need to [create a service account](https://cloud.google.com/compute/docs/access/service-accounts#newserviceaccounts) for TeamCity and assign the [following roles](https://cloud.google.com/iam/docs/understanding-roles):
 * `Cloud SQL Client` - to access TeamCity database.
-* `Compute Instance Admin (v1)` - to use use [Google cloud build agents](https://plugins.jetbrains.com/plugin/9704-google-cloud-agents).
+* `Project Viewer` / `Compute Instance Admin (v1)` - to use use [Google cloud build agents](https://plugins.jetbrains.com/plugin/9704-google-cloud-agents).
 * `Project Viewer` / `Storage Object Admin` - to store [TeamCity build artifacts in Google Storage](https://plugins.jetbrains.com/plugin/9634-google-artifact-storage).
 
 ## Deployment
