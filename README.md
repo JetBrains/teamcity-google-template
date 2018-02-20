@@ -2,6 +2,8 @@
 
 Allows to create TeamCity deployment in Google Cloud by using [gcloud tool](https://cloud.google.com/sdk/gcloud/) locally or in the [Google Cloud console](https://console.cloud.google.com/).
 
+The template allows deploying a TeamCity [server](https://hub.docker.com/r/jetbrains/teamcity-server/) and [agent](https://hub.docker.com/r/jetbrains/teamcity-agent/) in Google Cloud Platform. It creates a MySQL database, a Google Compute Engine (GCE) instance with CoreOS and starts TeamCity in a docker container.
+
 ## Pre-requisites
 
 ### Google Cloud APIs
@@ -63,3 +65,18 @@ Deploy TeamCity after editing `teamcity.yaml` config file via following command:
 
 **Note**: Deployment will take several minutes, on completion you could navigate to the `teamcityUrl` output value to see TeamCity UI.
 
+After deployment you will be able to connect to the `teamcity` virtual machine via SSH. In CoreOS TeamCity works as the following systemd service:
+
+* `teamcity-server.service` - launches TeamCity server.
+* `teamcity-agent.service` - launches TeamCity agent.
+
+### Installed Plugins
+
+The template installs the following Google Cloud Platform integrations in TeamCity:
+
+* [Google Cloud Agents](https://plugins.jetbrains.com/plugin/9260-azure-resource-manager-cloud-support) - allows to scale the pool of TeamCity build agents by leveraging GCE.
+* [Google Artifacts Storage](https://plugins.jetbrains.com/plugin/9634-google-artifact-storage) - allows to store build artifacts in Google Storage Blobs.
+
+### Futher Steps
+
+**Note**: TeamCity server exposes HTTP endpoint, so please make sure to enable HTTPS endpoint for GCE instance for production usage.
