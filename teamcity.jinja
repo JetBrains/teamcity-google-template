@@ -14,15 +14,26 @@ limitations under the License.
 #}
 
 resources:
+- name: enable-services
+  type: enable-services.jinja
+  properties:
+    apis:
+    - sqladmin.googleapis.com
+    - iam.googleapis.com
+    - cloudresourcemanager.googleapis.com
+
 - name: database
   type: database.jinja
   properties:
     zone: {{ properties['zone'] }}
     size: {{ properties['installationSize'] }}
+
 - name: network
   type: network.jinja
+
 - name: service-account
   type: service-account.jinja
+
 - name: teamcity
   type: virtual-machine.jinja
   properties:

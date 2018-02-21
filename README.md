@@ -6,19 +6,6 @@ The template allows deploying a TeamCity [server](https://hub.docker.com/r/jetbr
 
 ## Pre-requisites
 
-### Google Cloud APIs
-
-Ensure that you have enabled following Google Cloud APIs in your project:
-* [Cloud Deployment Manager V2 API](https://console.cloud.google.com/apis/api/deploymentmanager.googleapis.com/overview)
-* [Google Cloud Resource Manager API](https://console.cloud.google.com/apis/api/cloudresourcemanager.googleapis.com/overview)
-* [Google Identity and Access Management (IAM) API](https://console.cloud.google.com/apis/api/iam.googleapis.com/overview)
-* [Cloud SQL Administration API](https://console.developers.google.com/apis/api/sqladmin.googleapis.com/overview)
-
-You could do it via the following command:
-```
-> gcloud services enable deploymentmanager.googleapis.com cloudresourcemanager.googleapis.com iam.googleapis.com sqladmin.googleapis.com
-```
-
 ### Service account
 
 Please ensure in the [IAM console](https://console.cloud.google.com/iam-admin/iam/project) that [Deployment Manager service account](https://cloud.google.com/deployment-manager/docs/access-control#access_control_for_deployment_manager) `<project_number>@cloudservices.gserviceaccount.com` has `Project Owner` role.
@@ -91,3 +78,11 @@ The template installs the following Google Cloud Platform integrations in TeamCi
 ### Futher Steps
 
 **Note**: TeamCity server exposes HTTP endpoint, so please make sure to enable HTTPS endpoint for GCE instance for production usage.
+
+## Under the Hood
+
+The template while deployment allocates following resource:
+* Service account with `Project Viewer`, `Cloud SQL Client`, `Compute Instance Admin`, `Storage Object Admin` roles
+* Network with firewall rules
+* Database and user
+* GCE instance with data disk powered by CoreOS and assigned service account

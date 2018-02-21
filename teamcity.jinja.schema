@@ -14,6 +14,7 @@
 
 imports:
 - path: database.jinja
+- path: enable-services.jinja
 - path: network.jinja
 - path: service-account.jinja
 - path: teamcity.jinja
