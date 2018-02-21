@@ -10,14 +10,27 @@ The template allows deploying a TeamCity [server](https://hub.docker.com/r/jetbr
 
 Ensure that you have enabled following Google Cloud APIs in your project:
 * [Cloud Deployment Manager V2 API](https://console.cloud.google.com/apis/api/deploymentmanager.googleapis.com/overview)
+* [Google Cloud Resource Manager API](https://console.cloud.google.com/apis/api/cloudresourcemanager.googleapis.com/overview)
+* [Google Identity and Access Management (IAM) API](https://console.cloud.google.com/apis/api/iam.googleapis.com/overview)
 * [Cloud SQL Administration API](https://console.developers.google.com/apis/api/sqladmin.googleapis.com/overview)
+
+You could do it via the following command:
+```
+> gcloud services enable deploymentmanager.googleapis.com cloudresourcemanager.googleapis.com iam.googleapis.com sqladmin.googleapis.com
+```
 
 ### Service account
 
-If you don't have [Compute Engine default service account](https://cloud.google.com/compute/docs/access/service-accounts#compute_engine_default_service_account) in your project you need to [create a service account](https://cloud.google.com/compute/docs/access/service-accounts#newserviceaccounts) for TeamCity and assign the [following roles](https://cloud.google.com/iam/docs/understanding-roles):
-* `Cloud SQL Client` - to access TeamCity database.
-* `Project Viewer` / `Compute Instance Admin (v1)` - to use use [Google cloud build agents](https://plugins.jetbrains.com/plugin/9704-google-cloud-agents).
-* `Project Viewer` / `Storage Object Admin` - to store [TeamCity build artifacts in Google Storage](https://plugins.jetbrains.com/plugin/9634-google-artifact-storage).
+Please ensure in the [IAM console](https://console.cloud.google.com/iam-admin/iam/project) that [Deployment Manager service account](https://cloud.google.com/deployment-manager/docs/access-control#access_control_for_deployment_manager) `<project_number>@cloudservices.gserviceaccount.com` has `Project Owner` role.
+
+You could also do that via gcloud. To get project number execute:
+```
+> gcloud projects describe $(gcloud config get-value project) --flatten 'projectNumber'
+```
+Grant owner role for service account:
+```
+gcloud projects add-iam-policy-binding $(gcloud config get-value project) --member serviceAccount:<projectNumber>@cloudservices.gserviceaccount.com --role roles/owner
+```
 
 ## Deployment
 
@@ -34,7 +47,6 @@ You could specify the following properties for deployment:
 * `zone` - [zone](https://cloud.google.com/compute/docs/regions-zones/) in which this deployment will run.
 * `version` - TeamCity version to deploy.
 * `installationSize` - the size of installation: small/medium/large
-* `serviceAccount` - the service account e-mail for TeamCity virtual machine.
 
 #### Installation Size
 
@@ -52,8 +64,7 @@ List of pre-configured installation types:
 
 Deploy TeamCity as a template by specifying properties:
 ```
-> gcloud deployment-manager deployments create test --template teamcity.jinja --properties \
-  zone:us-central1-a,version:2017.2.2,installationSize:medium,serviceAccount:account@my-project-123.iam.gserviceaccount.com
+> gcloud deployment-manager deployments create test --template teamcity.jinja --properties zone:us-central1-a,version:2017.2.2
 ```
 
 ### Configuration

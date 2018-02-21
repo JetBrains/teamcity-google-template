@@ -21,6 +21,8 @@ resources:
     size: {{ properties['installationSize'] }}
 - name: network
   type: network.jinja
+- name: service-account
+  type: service-account.jinja
 - name: teamcity
   type: virtual-machine.jinja
   properties:
@@ -28,7 +30,7 @@ resources:
     teamcityVersion: {{ properties['version'] }}
     network: $(ref.network.selfLink)
     size: {{ properties['installationSize'] }}
-    serviceAccount: {{ properties['serviceAccount'] }}
+    serviceAccount: $(ref.service-account.email)
     database:
       instance: $(ref.database.instance)
       name: $(ref.database.name)
