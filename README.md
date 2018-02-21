@@ -32,8 +32,8 @@ Clone this repository locally:
 You could specify the following properties for deployment:
 
 * `zone` - [zone](https://cloud.google.com/compute/docs/regions-zones/) in which this deployment will run.
-* `version` - TeamCity version to deploy.
-* `installationSize` - the size of installation: small/medium/large
+* `version` - [TeamCity version](https://www.jetbrains.com/teamcity/download/) to deploy.
+* `installationSize` - the size of installation: small/medium/large.
 
 #### Installation Size
 
@@ -63,7 +63,21 @@ Deploy TeamCity after editing `teamcity.yaml` config file via following command:
 
 **Note**: Deployment will take several minutes, on completion you could navigate to the `teamcityUrl` output value to see TeamCity UI.
 
-After deployment you will be able to connect to the `teamcity` virtual machine via SSH. In CoreOS TeamCity works as the following systemd service:
+### Further Steps
+
+**Note**: TeamCity server exposes HTTP endpoint, so please make sure to enable HTTPS endpoint for GCE instance for production usage.
+
+## Under the Hood
+
+The template allocates while deployment following resource:
+* Service account with `Project Viewer`, `Cloud SQL Client`, `Compute Instance Admin` and `Storage Object Admin` roles.
+* Network, firewall rules and static IP address.
+* MySQL database and user.
+* GCE instance with data disk powered by CoreOS and assigned service account.
+
+### GCE Instance
+
+After deployment you will be able to connect to the GCE instance via SSH. In CoreOS TeamCity works as the following systemd service:
 
 * `teamcity-server.service` - launches TeamCity server.
 * `teamcity-agent.service` - launches TeamCity agent.
@@ -74,15 +88,3 @@ The template installs the following Google Cloud Platform integrations in TeamCi
 
 * [Google Cloud Agents](https://plugins.jetbrains.com/plugin/9704-google-cloud-agents) - allows to scale the pool of TeamCity build agents by leveraging GCE.
 * [Google Artifacts Storage](https://plugins.jetbrains.com/plugin/9634-google-artifact-storage) - allows to store build artifacts in Google Storage Blobs.
-
-### Futher Steps
-
-**Note**: TeamCity server exposes HTTP endpoint, so please make sure to enable HTTPS endpoint for GCE instance for production usage.
-
-## Under the Hood
-
-The template while deployment allocates following resource:
-* Service account with `Project Viewer`, `Cloud SQL Client`, `Compute Instance Admin`, `Storage Object Admin` roles
-* Network with firewall rules
-* Database and user
-* GCE instance with data disk powered by CoreOS and assigned service account

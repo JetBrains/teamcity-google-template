@@ -53,6 +53,12 @@ resources:
     sizeGb: {{ DISK_SIZE }}
     type: {{ ZonalComputeUrl(env['project'], properties['zone'], 'diskTypes', DISK_TYPE) }}
 
+- name: {{ BASE_NAME }}-address
+  type: compute.v1.address
+  properties:
+    name: {{ BASE_NAME }}-address
+    region: {{ REGION }}
+
 - name: {{ BASE_NAME }}
   type: compute.v1.instance
   properties:
@@ -261,6 +267,7 @@ resources:
       - accessConfigs:
         - name: external-nat
           type: ONE_TO_ONE_NAT
+          natIP: $(ref.{{ BASE_NAME }}-address.address)
         network: {{ properties['network'] }}
     tags:
       items:
