@@ -21,7 +21,7 @@ resources:
   properties:
     IPv4Range: 10.240.0.0/16
 
-- name: allow-http
+- name: {{ BASE_NAME }}-allow-http
   type: compute.v1.firewall
   properties:
     network: $(ref.{{ BASE_NAME }}.selfLink)
@@ -33,7 +33,7 @@ resources:
     targetTags:
     - http-server
 
-- name: allow-ssh
+- name: {{ BASE_NAME }}-allow-ssh
   type: compute.v1.firewall
   properties:
     network: $(ref.{{ BASE_NAME }}.selfLink)
