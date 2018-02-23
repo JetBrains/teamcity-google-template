@@ -61,6 +61,16 @@ List of pre-configured installation types:
 
 **Note**: TeamCity server exposes HTTP endpoint, so please make sure to enable HTTPS endpoint for GCE instance for production usage.
 
+## TeamCity Update
+
+To change the TeamCity version you could start deployment script with a required version number and then execute [Reset](https://cloud.google.com/compute/docs/instances/restarting-an-instance) action on the teamcity virtual machine:
+ 
+```
+> gcloud deployment-manager deployments update teamcity --template https://raw.githubusercontent.com/dtretyakov/teamcity-google-template/master/teamcity.jinja --properties zone:us-central1-a,version:2017.2.2
+```
+
+**Note**: you could not change the `zone` parameter while update.
+
 ## Under the Hood
 
 The template allocates while deployment following resource:
