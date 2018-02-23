@@ -8,11 +8,12 @@ The template allows deploying a TeamCity [server](https://hub.docker.com/r/jetbr
 
 ### Service account
 
-Please ensure in the [IAM console](https://console.cloud.google.com/iam-admin/iam/project) that [Deployment Manager service account](https://cloud.google.com/deployment-manager/docs/access-control#access_control_for_deployment_manager) `<projectNumber>@cloudservices.gserviceaccount.com` has `Project Owner` role.
+Please ensure in the [IAM console](https://console.cloud.google.com/iam-admin/iam/project) that [Deployment Manager service account](https://cloud.google.com/deployment-manager/docs/access-control#access_control_for_deployment_manager) `[project_number]@cloudservices.gserviceaccount.com` has `Project Owner` role.
 
 You could also do that via following command:
-```
-gcloud projects add-iam-policy-binding $(gcloud config get-value project) --member serviceAccount:$(gcloud projects describe $(gcloud config get-value project) --format="value(projectNumber)")@cloudservices.gserviceaccount.com --role roles/owner
+
+```sh
+> gcloud projects add-iam-policy-binding $(gcloud config get-value project) --member serviceAccount:$(gcloud projects describe $(gcloud config get-value project) --format="value(projectNumber)")@cloudservices.gserviceaccount.com --role roles/owner
 ```
 
 ### Google Cloud APIs
@@ -24,14 +25,16 @@ Ensure that you have enabled following Google Cloud APIs in your project:
 * [Cloud SQL Administration API](https://console.developers.google.com/apis/api/sqladmin.googleapis.com/overview)
 
 You could do it via the following command:
-```
+
+```sh
 > gcloud services enable deploymentmanager.googleapis.com sqladmin.googleapis.com iam.googleapis.com cloudresourcemanager.googleapis.com runtimeconfig.googleapis.com
 ```
 
 ## Deployment
 
 Deploy TeamCity as a template by specifying properties:
-```
+
+```sh
 > gcloud deployment-manager deployments create teamcity --template https://raw.githubusercontent.com/dtretyakov/teamcity-google-template/master/teamcity.jinja --properties zone:us-central1-a,version:2017.2.2
 ```
 
@@ -65,7 +68,7 @@ List of pre-configured installation types:
 
 To change the TeamCity version you could start deployment script with a required version number and then execute [Reset](https://cloud.google.com/compute/docs/instances/restarting-an-instance) action on the teamcity virtual machine:
  
-```
+```sh
 > gcloud deployment-manager deployments update teamcity --template https://raw.githubusercontent.com/dtretyakov/teamcity-google-template/master/teamcity.jinja --properties zone:us-central1-a,version:2017.2.2
 ```
 
