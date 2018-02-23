@@ -1,4 +1,5 @@
-# TeamCity template for Google Cloud Deployment Manager
+# TeamCity Google Cloud Deployment Manager template
+[![JetBrains incubator project](http://jb.gg/badges/incubator.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 
 Allows to create TeamCity deployment in Google Cloud by using [gcloud tool](https://cloud.google.com/sdk/gcloud/) locally or in the [Google Cloud console](https://console.cloud.google.com/).
 
