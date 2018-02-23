@@ -26,7 +26,7 @@ resources:
 - name: service-account
   type: service-account.jinja
 
-- name: teamcity
+- name: vm
   type: virtual-machine.jinja
   properties:
     zone: {{ properties['zone'] }}
@@ -47,4 +47,4 @@ resources:
 
 outputs:
 - name: teamcityUrl
-  value: http://$(ref.teamcity.ip)/
+  value: http://$(ref.vm.ip)/

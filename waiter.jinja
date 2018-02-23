@@ -26,7 +26,7 @@ resources:
   type: runtimeconfig.v1beta1.waiter
   metadata:
     dependsOn:
-    - {{ env['deployment'] + '-teamcity' }}
+    - {{ env['deployment'] + '-vm' }}
   properties:
     parent: $(ref.{{ BASE_NAME }}-config.name)
     waiter: {{ BASE_NAME }}-software
