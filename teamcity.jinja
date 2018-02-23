@@ -14,14 +14,6 @@ limitations under the License.
 #}
 
 resources:
-- name: enable-services
-  type: enable-services.jinja
-  properties:
-    apis:
-    - sqladmin.googleapis.com
-    - iam.googleapis.com
-    - cloudresourcemanager.googleapis.com
-
 - name: database
   type: database.jinja
   properties:
@@ -46,6 +38,12 @@ resources:
       instance: $(ref.database.instance)
       name: $(ref.database.name)
       user: $(ref.database.user)
+    waiter:
+      name: $(ref.waiter.name)
+      config: $(ref.waiter.config)
+
+- name: waiter
+  type: waiter.jinja
 
 outputs:
 - name: teamcityUrl

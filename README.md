@@ -8,24 +8,34 @@ The template allows deploying a TeamCity [server](https://hub.docker.com/r/jetbr
 
 ### Service account
 
-Please ensure in the [IAM console](https://console.cloud.google.com/iam-admin/iam/project) that [Deployment Manager service account](https://cloud.google.com/deployment-manager/docs/access-control#access_control_for_deployment_manager) `<project_number>@cloudservices.gserviceaccount.com` has `Project Owner` role.
+Please ensure in the [IAM console](https://console.cloud.google.com/iam-admin/iam/project) that [Deployment Manager service account](https://cloud.google.com/deployment-manager/docs/access-control#access_control_for_deployment_manager) `<projectNumber>@cloudservices.gserviceaccount.com` has `Project Owner` role.
 
-You could also do that via gcloud. To get project number execute:
+You could also do that via following command:
 ```
-> gcloud projects describe $(gcloud config get-value project) --flatten 'projectNumber'
+gcloud projects add-iam-policy-binding $(gcloud config get-value project) --member serviceAccount:$(gcloud projects describe $(gcloud config get-value project) --format="value(projectNumber)")@cloudservices.gserviceaccount.com --role roles/owner
 ```
-Grant owner role for service account:
+
+### Google Cloud APIs
+
+Ensure that you have enabled following Google Cloud APIs in your project:
+* [Cloud Deployment Manager V2 API](https://console.cloud.google.com/apis/api/deploymentmanager.googleapis.com/overview)
+* [Google Cloud Resource Manager API](https://console.cloud.google.com/apis/api/cloudresourcemanager.googleapis.com/overview)
+* [Google Identity and Access Management (IAM) API](https://console.cloud.google.com/apis/api/iam.googleapis.com/overview)
+* [Cloud SQL Administration API](https://console.developers.google.com/apis/api/sqladmin.googleapis.com/overview)
+
+You could do it via the following command:
 ```
-gcloud projects add-iam-policy-binding $(gcloud config get-value project) --member serviceAccount:<projectNumber>@cloudservices.gserviceaccount.com --role roles/owner
+> gcloud services enable deploymentmanager.googleapis.com sqladmin.googleapis.com iam.googleapis.com cloudresourcemanager.googleapis.com runtimeconfig.googleapis.com
 ```
 
 ## Deployment
 
-Clone this repository locally:
+Deploy TeamCity as a template by specifying properties:
 ```
-> git clone https://github.com/dtretyakov/teamcity-google-template.git
-> cd teamcity-google-template
+> gcloud deployment-manager deployments create teamcity --template https://raw.githubusercontent.com/dtretyakov/teamcity-google-template/master/teamcity.jinja --properties zone:us-central1-a,version:2017.2.2
 ```
+
+**Note**: Deployment will take several minutes, on completion you could navigate to the `teamcityUrl` output value to see TeamCity UI.
 
 ### Properties
 
@@ -46,22 +56,6 @@ List of pre-configured installation types:
 | Large             | 20 users, 1000 builds/day | 4    | 8 GB | 128 GB SSD   | db-n1-standard-2 |
 
 **Note**: Pricing for [Google Compute Engine](https://cloud.google.com/compute/pricing#custommachinetypepricing) and [MySQL database](https://cloud.google.com/sql/docs/mysql/pricing).
-
-### Template
-
-Deploy TeamCity as a template by specifying properties:
-```
-> gcloud deployment-manager deployments create test --template teamcity.jinja --properties zone:us-central1-a,version:2017.2.2
-```
-
-### Configuration
-
-Deploy TeamCity after editing `teamcity.yaml` config file via following command:
-```
-> gcloud deployment-manager deployments create test --config teamcity.yaml
-```
-
-**Note**: Deployment will take several minutes, on completion you could navigate to the `teamcityUrl` output value to see TeamCity UI.
 
 ### Further Steps
 

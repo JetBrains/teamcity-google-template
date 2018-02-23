@@ -251,6 +251,24 @@ resources:
                 [Install]
                 WantedBy=multi-user.target
 {% endraw %}
+            - name: "report-waiter-status.service"
+              enable: true
+              command: "start"
+              content: |
+                [Unit]
+                After=docker.service teamcity-server.service
+                Before=teamcity-agent.service
+                Requires=docker.service teamcity-server.service
+                ConditionPathExists=!/etc/teamcity/waiter
+
+                [Service]
+                Type=oneshot
+                ExecStart=/usr/bin/docker run --rm  -e "CLOUDSDK_CORE_DISABLE_PROMPTS=1" google/cloud-sdk:alpine gcloud beta runtime-config configs variables set success/{{ properties['waiter']['name'] }} success --config-name {{ properties['waiter']['config'] }}
+                ExecStart=/usr/bin/docker rmi google/cloud-sdk:alpine
+                ExecStart=/bin/touch /etc/teamcity/waiter
+
+                [Install]
+                WantedBy=multi-user.target
     disks:
       - deviceName: boot
         type: PERSISTENT

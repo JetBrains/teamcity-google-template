@@ -27,9 +27,6 @@ limitations under the License.
 resources:
 - name: {{ BASE_NAME }}
   type: gcp-types/sqladmin-v1beta4:instances
-  metadata:
-    dependsOn:
-    - enable-sqladmin.googleapis.com
   properties:
     region: {{ REGION }}
     settings:
