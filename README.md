@@ -78,7 +78,7 @@ To change the TeamCity version you could start deployment script with a required
 ## Under the Hood
 
 The template allocates while deployment following resource:
-* Service account with `Project Viewer`, `Cloud SQL Client`, `Compute Instance Admin` and `Storage Object Admin` roles.
+* Service account with `Project Viewer`, `Cloud SQL Client`, `Compute Instance Admin`, `Storage Object Admin` and `Service Account Token Creator` roles.
 * Network, firewall rules and static IP address.
 * MySQL database and user.
 * GCE instance with data disk powered by CoreOS and assigned service account.
