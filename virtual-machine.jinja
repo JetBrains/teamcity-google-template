@@ -41,6 +41,10 @@ limitations under the License.
 {{ COMPUTE_URL_BASE }}projects/{{ project }}/zones/{{ zone }}/{{ collection }}/{{ name }}
 {%- endmacro %}
 
+{% macro RegionalComputeUrl(project, region, collection, name) -%}
+{{ COMPUTE_URL_BASE }}projects/{{ project }}/regions/{{ region }}/{{ collection }}/{{ name }}
+{%- endmacro %}
+
 {% macro SqlInstanceName(project, region, dbName) -%}
 {{ project }}:{{ region }}:{{ dbName }}
 {%- endmacro %}
@@ -286,7 +290,10 @@ resources:
         - name: external-nat
           type: ONE_TO_ONE_NAT
           natIP: $(ref.{{ BASE_NAME }}-address.address)
-        network: {{ properties['network'] }}
+        network: {{ GlobalComputeUrl(env['project'], 'networks', properties['network']) }}
+{% if properties['subnetwork'] %}
+        subnetwork: {{ RegionalComputeUrl(env['project'], REGION, 'subnetworks', properties['subnetwork']) }}
+{% endif %}
     tags:
       items:
         - http-server

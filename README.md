@@ -36,7 +36,7 @@ You could do it via the following command:
 Deploy TeamCity as a template by specifying properties:
 
 ```sh
-> gcloud deployment-manager deployments create teamcity --template https://raw.githubusercontent.com/dtretyakov/teamcity-google-template/master/teamcity.jinja --properties zone:<zone>,version:2017.2.2
+> gcloud deployment-manager deployments create teamcity --template https://raw.githubusercontent.com/dtretyakov/teamcity-google-template/master/teamcity.jinja --properties zone:<zone>
 ```
 
 **Note**: Deployment will take several minutes, on completion you could navigate to the `teamcityUrl` output value to see TeamCity UI.
@@ -50,6 +50,8 @@ You could specify the following properties for deployment:
 * `installationSize` - the size of installation: small/medium/large.
 * `serviceAccount` - the e-mail of service account specified for TeamCity GCE instance.
 * `createStorageBucket` - allows to create storage bucket to store build artifacts.
+* `network` - the network name in the [same region](https://cloud.google.com/compute/docs/regions-zones/) which will be used by TeamCity GCE instance.
+* `subnetwork` - the subnetwork name in the same region which will be used by TeamCity GCE instance.
 
 #### Installation Size
 
@@ -98,3 +100,13 @@ The template installs the following Google Cloud Platform integrations in TeamCi
 
 * [Google Cloud Agents](https://plugins.jetbrains.com/plugin/9704-google-cloud-agents) - allows to scale the pool of TeamCity build agents by leveraging GCE.
 * [Google Artifacts Storage](https://plugins.jetbrains.com/plugin/9634-google-artifact-storage) - allows to store build artifacts in Google Storage Blobs.
+
+## Common Problems
+
+### "Subnetwork should be specified for custom subnetmode network" error while deployment
+
+It happens when subnetwork was not specified or does not exist in specified zone.
+
+### Could not connect to the TeamCity server with custom network
+
+Ensure that you have configured firewall rules to access TeamCity server on HTTP/HTTPS port.

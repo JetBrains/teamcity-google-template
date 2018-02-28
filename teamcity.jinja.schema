@@ -26,11 +26,16 @@ info:
   author: JetBrains s.r.o.
   description: Creates a TeamCity server and build agent.
 
+required:
+- zone
+
 properties:
   zone:
     description: Zone in which this deployment will run
     type: string
-    default: us-central1-c
+    default: us-central1-a
+    x-googleProperty:
+      type: GCE_ZONE
 
   version:
     description: The version of TeamCity
@@ -64,6 +69,12 @@ properties:
     description: Allows to create storage bucket to store build artifacts
     type: boolean
     default: true
+
+  network:
+    type: string
+    description: Self link for a GCE network in which TeamCity instance will run.
+    x-googleProperty:
+      type: GCE_NETWORK
 
 outputs:
   teamcityUrl:

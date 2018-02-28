@@ -20,8 +20,10 @@ resources:
     zone: {{ properties['zone'] }}
     size: {{ properties['installationSize'] }}
 
+{% if not properties['network'] %}
 - name: network
   type: network.jinja
+{% endif %}
 
 {% if not properties['serviceAccount'] %}
 - name: service-account
@@ -40,7 +42,12 @@ resources:
   properties:
     zone: {{ properties['zone'] }}
     teamcityVersion: {{ properties['version'] }}
-    network: $(ref.network.selfLink)
+{% if properties['network'] %}
+    network: {{ properties['network'] }}
+{% else %}
+    network: $(ref.network.name)
+{% endif %}
+    subnetwork: {{ properties['subnetwork'] }}
     size: {{ properties['installationSize'] }}
 {% if properties['serviceAccount'] %}
     serviceAccount: {{ properties['serviceAccount'] }}
