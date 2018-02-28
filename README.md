@@ -36,7 +36,7 @@ You could do it via the following command:
 Deploy TeamCity as a template by specifying properties:
 
 ```sh
-> gcloud deployment-manager deployments create teamcity --template https://raw.githubusercontent.com/dtretyakov/teamcity-google-template/master/teamcity.jinja --properties zone:<zone>
+> gcloud deployment-manager deployments create teamcity --template https://raw.githubusercontent.com/JetBrains/teamcity-google-template/master/teamcity.jinja --properties zone:<zone>
 ```
 
 **Note**: Deployment will take several minutes, on completion you could navigate to the `teamcityUrl` output value to see TeamCity UI.
@@ -74,7 +74,7 @@ List of pre-configured installation types:
 To change the TeamCity version you could start deployment script with a required version number and then execute [Reset](https://cloud.google.com/compute/docs/instances/restarting-an-instance) action on the teamcity virtual machine:
  
 ```sh
-> gcloud deployment-manager deployments update teamcity --template https://raw.githubusercontent.com/dtretyakov/teamcity-google-template/master/teamcity.jinja --properties zone:<zone>,version:2017.2.2
+> gcloud deployment-manager deployments update teamcity --template https://raw.githubusercontent.com/JetBrains/teamcity-google-template/master/teamcity.jinja --properties zone:<zone>,version:2017.2.2
 ```
 
 **Note**: you could not change the `zone` parameter while deployment update.
