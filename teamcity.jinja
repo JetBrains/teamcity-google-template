@@ -23,8 +23,10 @@ resources:
 - name: network
   type: network.jinja
 
+{% if properties['serviceAccount'] == none %}
 - name: service-account
   type: service-account.jinja
+{% endif %}
 
 - name: vm
   type: virtual-machine.jinja
@@ -33,7 +35,11 @@ resources:
     teamcityVersion: {{ properties['version'] }}
     network: $(ref.network.selfLink)
     size: {{ properties['installationSize'] }}
+{% if properties['serviceAccount'] %}
+    serviceAccount: {{ properties['serviceAccount'] }}
+{% else %}
     serviceAccount: $(ref.service-account.email)
+{% endif %}
     database:
       instance: $(ref.database.instance)
       name: $(ref.database.name)

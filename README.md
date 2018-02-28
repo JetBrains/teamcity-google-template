@@ -48,6 +48,7 @@ You could specify the following properties for deployment:
 * `zone` - [zone](https://cloud.google.com/compute/docs/regions-zones/) in which this deployment will run.
 * `version` - [TeamCity version](https://www.jetbrains.com/teamcity/download/) to deploy.
 * `installationSize` - the size of installation: small/medium/large.
+* `serviceAccount` - the e-mail of service account specified for TeamCity GCE instance.
 
 #### Installation Size
 

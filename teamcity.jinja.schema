@@ -56,9 +56,8 @@ properties:
     - large
 
   serviceAccount:
-    description: The service account email
+    description: The service account e-mail
     type: string
-    default: default
 
 outputs:
   teamcityUrl:
