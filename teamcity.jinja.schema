@@ -16,6 +16,7 @@ imports:
 - path: database.jinja
 - path: network.jinja
 - path: service-account.jinja
+- path: storage.jinja
 - path: teamcity.jinja
 - path: virtual-machine.jinja
 - path: waiter.jinja
@@ -58,6 +59,11 @@ properties:
   serviceAccount:
     description: The service account e-mail
     type: string
+
+  createStorageBucket:
+    description: Allows to create storage bucket to store build artifacts
+    type: boolean
+    default: true
 
 outputs:
   teamcityUrl:

@@ -36,7 +36,7 @@ You could do it via the following command:
 Deploy TeamCity as a template by specifying properties:
 
 ```sh
-> gcloud deployment-manager deployments create teamcity --template https://raw.githubusercontent.com/dtretyakov/teamcity-google-template/master/teamcity.jinja --properties zone:us-central1-a,version:2017.2.2
+> gcloud deployment-manager deployments create teamcity --template https://raw.githubusercontent.com/dtretyakov/teamcity-google-template/master/teamcity.jinja --properties zone:<zone>,version:2017.2.2
 ```
 
 **Note**: Deployment will take several minutes, on completion you could navigate to the `teamcityUrl` output value to see TeamCity UI.
@@ -49,6 +49,7 @@ You could specify the following properties for deployment:
 * `version` - [TeamCity version](https://www.jetbrains.com/teamcity/download/) to deploy.
 * `installationSize` - the size of installation: small/medium/large.
 * `serviceAccount` - the e-mail of service account specified for TeamCity GCE instance.
+* `createStorageBucket` - allows to create storage bucket to store build artifacts.
 
 #### Installation Size
 
@@ -71,10 +72,10 @@ List of pre-configured installation types:
 To change the TeamCity version you could start deployment script with a required version number and then execute [Reset](https://cloud.google.com/compute/docs/instances/restarting-an-instance) action on the teamcity virtual machine:
  
 ```sh
-> gcloud deployment-manager deployments update teamcity --template https://raw.githubusercontent.com/dtretyakov/teamcity-google-template/master/teamcity.jinja --properties zone:us-central1-a,version:2017.2.2
+> gcloud deployment-manager deployments update teamcity --template https://raw.githubusercontent.com/dtretyakov/teamcity-google-template/master/teamcity.jinja --properties zone:<zone>,version:2017.2.2
 ```
 
-**Note**: you could not change the `zone` parameter while update.
+**Note**: you could not change the `zone` parameter while deployment update.
 
 ## Under the Hood
 

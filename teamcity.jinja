@@ -23,9 +23,16 @@ resources:
 - name: network
   type: network.jinja
 
-{% if properties['serviceAccount'] == none %}
+{% if not properties['serviceAccount'] %}
 - name: service-account
   type: service-account.jinja
+{% endif %}
+
+{% if properties['createStorageBucket'] %}
+- name: storage
+  type: storage.jinja
+  properties:
+    zone: {{ properties['zone'] }}
 {% endif %}
 
 - name: vm
