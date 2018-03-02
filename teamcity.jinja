@@ -13,33 +13,42 @@ See the License for the specific language governing permissions and
 limitations under the License.
 #}
 
+{% set BASE_NAME = env['deployment'][:40] %}
+
 resources:
 - name: database
   type: database.jinja
   properties:
+    baseName: {{ BASE_NAME }}
     zone: {{ properties['zone'] }}
     size: {{ properties['installationSize'] }}
 
 {% if not properties['network'] %}
 - name: network
   type: network.jinja
+  properties:
+    baseName: {{ BASE_NAME }}
 {% endif %}
 
 {% if not properties['serviceAccount'] %}
 - name: service-account
   type: service-account.jinja
+  properties:
+    baseName: {{ BASE_NAME }}
 {% endif %}
 
 {% if properties['createStorageBucket'] %}
 - name: storage
   type: storage.jinja
   properties:
+    baseName: {{ BASE_NAME }}
     zone: {{ properties['zone'] }}
 {% endif %}
 
 - name: vm
   type: virtual-machine.jinja
   properties:
+    baseName: {{ BASE_NAME }}
     zone: {{ properties['zone'] }}
     teamcityVersion: {{ properties['version'] }}
 {% if properties['network'] %}
@@ -64,6 +73,8 @@ resources:
 
 - name: waiter
   type: waiter.jinja
+  properties:
+    baseName: {{ BASE_NAME }}
 
 outputs:
 - name: teamcityUrl

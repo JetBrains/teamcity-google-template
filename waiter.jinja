@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 #}
 
-{% set BASE_NAME = env['deployment'] + '-' + env['name'] %}
+{% set BASE_NAME = properties['baseName'] + '-' + env['name'] %}
 
 resources:
 - name: {{ BASE_NAME }}-config
@@ -26,7 +26,7 @@ resources:
   type: runtimeconfig.v1beta1.waiter
   metadata:
     dependsOn:
-    - {{ env['deployment'] + '-vm' }}
+    - {{ properties['baseName'] + '-vm' }}
   properties:
     parent: $(ref.{{ BASE_NAME }}-config.name)
     waiter: {{ BASE_NAME }}-software

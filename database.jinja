@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 #}
 
-{% set BASE_NAME = env['deployment'] + '-' + env['name'] %}
+{% set BASE_NAME = properties['baseName'] + '-' + env['name'] %}
 {% set REGION = properties['zone'][:-2] %}
 {% set TEAMCITY_DB = 'teamcitydb' %}
 {% set TEAMCITY_USER = 'teamcity' %}
