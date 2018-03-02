@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 #}
 
-{% set BASE_NAME = env['deployment'] + '-' + env['name'] %}
+{% set BASE_NAME = env['deployment'] + '-' + env['name'] + '-' + env['project_number'] %}
 {% set LOCATION = properties['zone'][:-2] %}
 
 resources:
