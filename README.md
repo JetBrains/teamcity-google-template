@@ -77,7 +77,7 @@ To change the TeamCity version, start the deployment script with the required ve
 > gcloud deployment-manager deployments update teamcity --template https://raw.githubusercontent.com/JetBrains/teamcity-google-template/master/teamcity.jinja --properties zone:<zone>,version:2017.2.2
 ```
 
-**Note**: The `zone` parameter cannot be changed during the while deployment update.
+**Note**: The `zone` parameter cannot be changed during the deployment update.
 
 ## Under the Hood
 
