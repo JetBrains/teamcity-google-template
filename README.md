@@ -39,6 +39,12 @@ Deploy TeamCity as a template by specifying the following properties:
 > gcloud deployment-manager deployments create teamcity --template https://raw.githubusercontent.com/JetBrains/teamcity-google-template/master/teamcity.jinja --properties zone:<zone>
 ```
 
+To list available [zones](https://cloud.google.com/compute/docs/regions-zones/) execute the following command:
+
+```sh
+>gcloud compute zones list
+```
+
 **Note**: Deployment will take several minutes, on completion you will be able to navigate to the `teamcityUrl` output value to see the TeamCity web UI.
 
 ### Properties
