@@ -237,13 +237,14 @@ resources:
                 EnvironmentFile=/run/metadata/coreos
                 ExecStartPre=/bin/sh -c "docker images --filter 'before=jetbrains/teamcity-agent:${TEAMCITY_VERSION}' --format '{{.ID}} {{.Repository}}' | grep 'jetbrains/teamcity-agent' | grep -Eo '^[^ ]+' | xargs -r docker rmi" %}
                 ExecStart=/usr/bin/docker run \
-                  -v /var/run/docker.sock:/var/run/docker.sock \
                   -v /mnt/data/teamcity-agent/logs:/opt/buildagent/logs \
                   -v /mnt/data/teamcity-agent/plugins:/opt/buildagent/plugins \
                   -v /mnt/data/teamcity-agent/system:/opt/buildagent/system \
                   -v /mnt/resource/teamcity-agent/temp:/opt/buildagent/temp \
                   -v /mnt/resource/teamcity-server/temp:/opt/teamcity/temp \
                   -v /mnt/data/teamcity-agent/tools:/opt/buildagent/tools \
+                  --privileged \
+                  -e DOCKER_IN_DOCKER=start \
                   -e SERVER_URL=${COREOS_GCE_HOSTNAME} \
                   -e AGENT_NAME=Default \
                   --name teamcity-agent \
