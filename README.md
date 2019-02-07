@@ -117,6 +117,14 @@ After deployment you will be able to connect to the GCE instance via SSH. In Cor
 
 * `teamcity-server.service` - launches TeamCity server.
 * `teamcity-agent.service` - launches TeamCity agent.
+* `nginx.service` - provides reverse proxy for TeamCity server when `domainName` is set.
+* `letsencrypt.service` - executes auto SSL certificate retrieval for specified `domainName`.
+
+To diagnose problems you could use the following commands:
+
+* `sudo systemctl (start|stop|status|restart) <serviceName>` - to manage service operation state.
+* `sudo journalctl -u <serviceName>` - to view history of service log.
+* `sudo journalctl -f -u <serviceName>` - to execute tail view of service log.
 
 ### Installed Plugins
 
