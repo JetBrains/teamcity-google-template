@@ -38,7 +38,7 @@ To do it, use the following command:
 The easiest and **not secure** way to create test TeamCity deployment is to execute the following command:
 
 ```sh
-> gcloud deployment-manager deployments create <deploymentName> --template https://jb.gg/teamcity-gcp --properties zone:<zone>
+> gcloud deployment-manager deployments create <deploymentName> --template https://raw.githubusercontent.com/JetBrains/teamcity-google-template/master/teamcity.jinja --properties zone:<zone>
 ```
 
 Where `<deploymentName>` should be unique name for deployment, e.g. "teamcity" and `<zone>` is set to one of the [zones](https://cloud.google.com/compute/docs/regions-zones/). To list available zones execute the following command:
@@ -57,7 +57,7 @@ To create a production ready TeamCity deployment you need to have a domain name 
 2. Create a new TeamCity deployment:
 
 ```sh
-> gcloud deployment-manager deployments create <deploymentName> --template https://jb.gg/teamcity-gcp --properties zone:<zone>,ipAddress:<ipAddress>,domainName:<domainName>,domainOwnerEmail:<domainOwnerEmail>
+> gcloud deployment-manager deployments create <deploymentName> --template https://raw.githubusercontent.com/JetBrains/teamcity-google-template/master/teamcity.jinja --properties zone:<zone>,ipAddress:<ipAddress>,domainName:<domainName>,domainOwnerEmail:<domainOwnerEmail>
 ```
 
 Where `<deploymentName>` should be unique name for deployment, e.g. "teamcity", `<zone>` is set to one of the [zones](https://cloud.google.com/compute/docs/regions-zones/), `<ipAddress>` is set to the external IP address, `<domainName>` is set to your domain name and optional `<domainOwnerEmail>` is set to your e-mail to be notified in case of problems with SSL certificate retrieval.
