@@ -33,6 +33,20 @@ resources:
     targetTags:
     - http-server
 
+{%- if properties['enableHttps'] %}
+- name: {{ BASE_NAME }}-allow-https
+  type: compute.v1.firewall
+  properties:
+    network: $(ref.{{ BASE_NAME }}.selfLink)
+    priority: 1000
+    sourceRanges: ["0.0.0.0/0"]
+    allowed:
+      - IPProtocol: TCP
+        ports: ["443"]
+    targetTags:
+    - https-server
+{%- endif %}
+
 - name: {{ BASE_NAME }}-allow-ssh
   type: compute.v1.firewall
   properties:

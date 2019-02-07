@@ -33,13 +33,15 @@ To do it, use the following command:
 
 ## Deployment
 
-Deploy TeamCity as a template by specifying the following properties:
+### Quick Start 
+
+The easiest and **not secure** way to create test TeamCity deployment is to execute the following command:
 
 ```sh
-> gcloud deployment-manager deployments create teamcity --template https://raw.githubusercontent.com/JetBrains/teamcity-google-template/master/teamcity.jinja --properties zone:<zone>
+> gcloud deployment-manager deployments create <deploymentName> --template https://jb.gg/teamcity-gcp --properties zone:<zone>
 ```
 
-To list available [zones](https://cloud.google.com/compute/docs/regions-zones/) execute the following command:
+Where `<deploymentName>` should be unique name for deployment, e.g. "teamcity" and `<zone>` is set to one of the [zones](https://cloud.google.com/compute/docs/regions-zones/). To list available zones execute the following command:
 
 ```sh
 > gcloud compute zones list
@@ -47,15 +49,35 @@ To list available [zones](https://cloud.google.com/compute/docs/regions-zones/) 
 
 **Note**: Deployment will take several minutes, on completion you will be able to navigate to the `teamcityUrl` output value to see the TeamCity web UI.
 
-### Properties
+### Secure Deployment
 
-It is possible to specify the following properties for your deployment:
+To create a production ready TeamCity deployment you need to have a domain name from any domain registrar and be able to configure `A`/`CNAME` records for this domain (if you don't have any you could use [Google Cloud DNS](https://cloud.google.com/dns/docs/quickstart)). Then proceed with the following steps:
+
+1. Create [external IP](https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address) and configure `A` record for your domain pointing to that IP. Wait until `nslookup <domainName>` command on your computer will be resolved into target IP address. **Note**: it may take up to 48 hours, but normally takes up to 1 hour.
+2. Create a new TeamCity deployment:
+
+```sh
+> gcloud deployment-manager deployments create <deploymentName> --template https://jb.gg/teamcity-gcp --properties zone:<zone>,ipAddress:<ipAddress>,domainName:<domainName>,domainOwnerEmail:<domainOwnerEmail>
+```
+
+Where `<deploymentName>` should be unique name for deployment, e.g. "teamcity", `<zone>` is set to one of the [zones](https://cloud.google.com/compute/docs/regions-zones/), `<ipAddress>` is set to the external IP address, `<domainName>` is set to your domain name and optional `<domainOwnerEmail>` is set to your e-mail to be notified in case of problems with SSL certificate retrieval.
+
+During deployment will be created TeamCity server deployment with [auto-retrieval of SSL certificates](https://github.com/JrCs/docker-letsencrypt-nginx-proxy-companion) from the [Let's Encrypt](https://letsencrypt.org/) and [nginx reverse proxy](https://github.com/jwilder/nginx-proxy).
+
+**Note**: Deployment will take several minutes, on completion you will be able to navigate to the `teamcityUrl` output value to see the TeamCity web UI.
+
+### Configuration Properties
+
+It is possible to specify the following list of comma-separated `--properties` list for your deployment:
 
 * `zone` - the [zone](https://cloud.google.com/compute/docs/regions-zones/) in which this deployment will run.
 * `version` - the [TeamCity version](https://www.jetbrains.com/teamcity/download/) to be deployed.
 * `installationSize` - the size of the installation: small/medium/large.
 * `serviceAccount` - the e-mail of the service account specified for the TeamCity GCE instance.
 * `createStorageBucket` - allows creating a storage bucket to store build artifacts.
+* `ipAddress` - the preliminary created in the same region external IP address for TeamCity server.
+* `domainName` - the [verified domain name](https://cloud.google.com/compute/docs/instances/create-ptr-record#domain_ownership) for TeamCity server which will be used to retrieve SSL certificate.
+* `domainOwnerEmail` - the e-mail address of domain owner used to notify about SSL certificate renewal for domain name.
 * `network` - the network name in the [same region](https://cloud.google.com/compute/docs/regions-zones/) which will be used by the TeamCity GCE instance.
 * `subnetwork` - the subnetwork name in the same region which will be used by the TeamCity GCE instance.
 
@@ -71,13 +93,9 @@ The list of pre-configured installation types:
 
 **Note**: See pricing for [Google Compute Engine](https://cloud.google.com/compute/pricing#custommachinetypepricing) and [MySQL database](https://cloud.google.com/sql/docs/mysql/pricing).
 
-### Further Steps
-
-**Note**: TeamCity server exposes an HTTP endpoint, so  make sure to enable the HTTPS endpoint for the GCE instance for production usage.
-
 ## TeamCity Update
 
-To change the TeamCity version, start the deployment script with the required version number and then execute the [Reset](https://cloud.google.com/compute/docs/instances/restarting-an-instance) action on the TeamCity virtual machine:
+To change the TeamCity version, start the deployment script with the required version number and then execute the [Reset](https://cloud.google.com/compute/docs/instances/restarting-an-instance) action on the TeamCity GCE instance:
  
 ```sh
 > gcloud deployment-manager deployments update teamcity --template https://raw.githubusercontent.com/JetBrains/teamcity-google-template/master/teamcity.jinja --properties zone:<zone>,version:2017.2.2

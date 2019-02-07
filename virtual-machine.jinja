@@ -19,6 +19,16 @@ limitations under the License.
 {% set DISK_SIZE = properties['zone'][:-2] %}
 {% set GOOGLE_FACTORY = '1.0.5' %}
 
+{% set NGINX_IMAGE = 'jwilder/nginx-proxy' %}
+{% set LETSENCRYPT_IMAGE = 'jrcs/letsencrypt-nginx-proxy-companion' %}
+{% set NGINX = 'nginx' %}
+{% set LETSENCRYPT = 'letsencrypt' %}
+{%- if properties['enableHttps'] %}
+  {% set SERVER_URL = 'https://' + properties['domainName'] %}
+{%- else %}
+  {% set SERVER_URL = 'http://${COREOS_GCE_HOSTNAME}' %}
+{%- endif %}
+
 {% if properties['size'] == 'small' %}
   {% set DISK_SIZE = 30 %}
   {% set DISK_TYPE = 'pd-standard' %}
@@ -57,11 +67,13 @@ resources:
     sizeGb: {{ DISK_SIZE }}
     type: {{ ZonalComputeUrl(env['project'], properties['zone'], 'diskTypes', DISK_TYPE) }}
 
+{%- if not properties['ipAddress'] %}
 - name: {{ BASE_NAME }}-address
   type: compute.v1.address
   properties:
     name: {{ BASE_NAME }}-address
     region: {{ REGION }}
+{%- endif %}
 
 - name: {{ BASE_NAME }}
   type: compute.v1.instance
@@ -95,6 +107,22 @@ resources:
           - path: "/etc/coreos/update.conf"
             content: |
               REBOOT_STRATEGY="off"
+{%- if properties['enableHttps'] %}
+          - path: "/etc/teamcity/checkCertificate.sh"
+            permissions: 0755
+            content: |
+              #!/bin/bash
+              attempt=0
+              while docker exec {{ LETSENCRYPT }} /app/cert_status | grep {{ properties['domainName'] }} > /dev/null; [[ $? -ne 0 ]]; do
+                retry_in_mins=$((3**$attempt))
+                echo "Will try to renew certificate for {{ SERVER_URL }} in $retry_in_mins minutes"
+                sleep $((60 * $retry_in_mins))
+                echo "Trying to renew certificate for {{ SERVER_URL }}..."
+                docker exec {{ LETSENCRYPT }} /app/signal_le_service
+                sleep 30
+                attempt=$(($attempt + 1))
+              done
+{% endif %}
           coreos:
             units:
             - name: "format-mnt-data.service"
@@ -155,7 +183,7 @@ resources:
 
                 [Install]
                 WantedBy=multi-user.target
-{% raw %}
+
             - name: "get-google-plugins.service"
               enable: true
               content: |
@@ -202,15 +230,26 @@ resources:
                 Requires=docker.service mnt-data.mount get-mysql-connector.service get-google-plugins.service prepare-config.service
 
                 [Service]
-                EnvironmentFile=/etc/teamcity/version
                 TimeoutStartSec=1200s
+                EnvironmentFile=/etc/teamcity/version
+{%- raw %}
                 ExecStartPre=/bin/sh -c "docker images --filter 'before=jetbrains/teamcity-server:${TEAMCITY_VERSION}' --format '{{.ID}} {{.Repository}}' | grep 'jetbrains/teamcity-server' | grep -Eo '^[^ ]+' | xargs -r docker rmi"
+{%- endraw %}
                 ExecStartPre=/usr/bin/docker create \
                   -e TEAMCITY_SERVER_MEM_OPTS="-Xmx$(($(grep MemTotal /proc/meminfo | awk '{print $2}') / 2))k -XX:MaxPermSize=270m -XX:ReservedCodeCacheSize=350m" \
+{%- if properties['enableHttps'] %}
+                  -e VIRTUAL_PORT=8111 \
+                  -e VIRTUAL_HOST={{ properties['domainName'] }} \
+                  -e LETSENCRYPT_HOST={{ properties['domainName'] }} \
+  {%- if properties['domainOwnerEmail'] %}
+                  -e LETSENCRYPT_EMAIL={{ properties['domainOwnerEmail'] }} \
+  {%- endif %}
+{%- else %}
+                  -p 80:8111 \
+{%- endif %}
                   -v /mnt/data/teamcity-server/data:/data/teamcity_server/datadir \
                   -v /mnt/data/teamcity-server/logs:/opt/teamcity/logs \
                   -v /mnt/resource/teamcity-server/temp:/opt/teamcity/temp \
-                  -p 80:8111 \
                   --name teamcity-server \
                   jetbrains/teamcity-server:${TEAMCITY_VERSION}
                 ExecStartPre=/bin/sh -c "echo 'gcp' > dist && docker cp dist teamcity-server:/opt/teamcity/webapps/ROOT/WEB-INF/DistributionType.txt && rm dist"
@@ -232,10 +271,12 @@ resources:
                 Requires=teamcity-server.service coreos-metadata.service
 
                 [Service]
-                EnvironmentFile=/etc/teamcity/version
                 TimeoutStartSec=1200s
+                EnvironmentFile=/etc/teamcity/version
                 EnvironmentFile=/run/metadata/coreos
+{%- raw %}
                 ExecStartPre=/bin/sh -c "docker images --filter 'before=jetbrains/teamcity-agent:${TEAMCITY_VERSION}' --format '{{.ID}} {{.Repository}}' | grep 'jetbrains/teamcity-agent' | grep -Eo '^[^ ]+' | xargs -r docker rmi" %}
+{%- endraw %}
                 ExecStart=/usr/bin/docker run \
                   -v /mnt/data/teamcity-agent/logs:/opt/buildagent/logs \
                   -v /mnt/data/teamcity-agent/plugins:/opt/buildagent/plugins \
@@ -245,7 +286,7 @@ resources:
                   -v /mnt/data/teamcity-agent/tools:/opt/buildagent/tools \
                   --privileged \
                   -e DOCKER_IN_DOCKER=start \
-                  -e SERVER_URL=${COREOS_GCE_HOSTNAME} \
+                  -e SERVER_URL={{ SERVER_URL }} \
                   -e AGENT_NAME=Default \
                   --name teamcity-agent \
                   jetbrains/teamcity-agent:${TEAMCITY_VERSION}
@@ -256,22 +297,80 @@ resources:
 
                 [Install]
                 WantedBy=multi-user.target
-{% endraw %}
+
+{%- if properties['enableHttps'] %}
+            - name: "{{ NGINX }}.service"
+              command: "start"
+              content: |
+                [Unit]
+                Description=NGINX reverse proxy
+                Requires=docker.service
+
+                [Service]
+                TimeoutStartSec=1200s
+                ExecStartPre=/usr/bin/docker pull {{ NGINX_IMAGE }}
+                ExecStart=/usr/bin/docker run \
+                  -p 80:80 \
+                  -p 443:443 \
+                  -v /etc/nginx/certs \
+                  -v /etc/nginx/vhost.d \
+                  -v /usr/share/nginx/html \
+                  -v /var/run/docker.sock:/tmp/docker.sock:ro \
+                  --name {{ NGINX }} \
+                  {{ NGINX_IMAGE }}
+                ExecStop=-/usr/bin/docker rm -f {{ NGINX }}
+                Restart=always
+
+                [Install]
+                WantedBy=multi-user.target
+
+            - name: "{{ LETSENCRYPT }}.service"
+              command: "start"
+              content: |
+                [Unit]
+                Description=Let's Encrypt
+                Requires=docker.service
+                After={{ NGINX }}.service
+                Before=teamcity-server.service
+
+                [Service]
+                TimeoutStartSec=1200s
+                ExecStartPre=/usr/bin/docker pull {{ LETSENCRYPT_IMAGE }}
+                ExecStart=/usr/bin/docker run \
+                  --volumes-from {{ NGINX }} \
+                  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+                  --name {{ LETSENCRYPT }} \
+                  {{ LETSENCRYPT_IMAGE }}
+                ExecStop=-/usr/bin/docker rm -f {{ LETSENCRYPT }}
+                Restart=always
+
+                [Install]
+                WantedBy=multi-user.target
+{%- endif %}
+
             - name: "report-waiter-status.service"
               enable: true
               command: "start"
               content: |
                 [Unit]
-                After=docker.service teamcity-server.service
-                Before=teamcity-agent.service
+{%- if properties['enableHttps'] %}
+                Requires=docker.service teamcity-server.service {{ NGINX }}.service {{ LETSENCRYPT }}.service
+{%- else %}
                 Requires=docker.service teamcity-server.service
+{%- endif  %}
+                Before=teamcity-agent.service
                 ConditionPathExists=!/etc/teamcity/waiter
 
                 [Service]
                 Type=oneshot
+                EnvironmentFile=/run/metadata/coreos
+{%- if properties['enableHttps'] %}
+                ExecStartPre=/bin/bash /etc/teamcity/checkCertificate.sh
+{%- endif  %}
+                ExecStartPre=/bin/bash -c "until $(curl --output /dev/null --silent --fail {{ SERVER_URL }}); do echo 'Waiting for success response from {{ SERVER_URL }}'; sleep 10; done;"
                 ExecStart=/usr/bin/docker run --rm  -e "CLOUDSDK_CORE_DISABLE_PROMPTS=1" google/cloud-sdk:alpine gcloud beta runtime-config configs variables set success/{{ properties['waiter']['name'] }} success --config-name {{ properties['waiter']['config'] }}
-                ExecStart=/usr/bin/docker rmi google/cloud-sdk:alpine
-                ExecStart=/bin/touch /etc/teamcity/waiter
+                ExecStartPost=/usr/bin/docker rmi google/cloud-sdk:alpine
+                ExecStartPost=/bin/touch /etc/teamcity/waiter
 
                 [Install]
                 WantedBy=multi-user.target
@@ -291,14 +390,21 @@ resources:
       - accessConfigs:
         - name: external-nat
           type: ONE_TO_ONE_NAT
+{%- if properties['ipAddress'] %}
+          natIP: {{ properties['ipAddress'] }}
+{%- else %}
           natIP: $(ref.{{ BASE_NAME }}-address.address)
+{%- endif %}
         network: {{ GlobalComputeUrl(env['project'], 'networks', properties['network']) }}
-{% if properties['subnetwork'] %}
+{%- if properties['subnetwork'] %}
         subnetwork: {{ RegionalComputeUrl(env['project'], REGION, 'subnetworks', properties['subnetwork']) }}
-{% endif %}
+{%- endif %}
     tags:
       items:
         - http-server
+{%- if properties['enableHttps'] %}
+        - https-server
+{%- endif %}
         - ssh-server
 
 outputs:

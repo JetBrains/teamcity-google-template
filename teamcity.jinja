@@ -15,6 +15,12 @@ limitations under the License.
 
 {% set BASE_NAME = env['deployment'][:40] %}
 
+{%- if not properties['domainName'] %}
+  {%- set ENABLE_HTTPS = false %}
+{%- else %}
+  {%- set ENABLE_HTTPS = true %}
+{%- endif %}
+
 resources:
 - name: database
   type: database.jinja
@@ -23,27 +29,28 @@ resources:
     zone: {{ properties['zone'] }}
     size: {{ properties['installationSize'] }}
 
-{% if not properties['network'] %}
+{%- if not properties['network'] %}
 - name: network
   type: network.jinja
   properties:
     baseName: {{ BASE_NAME }}
-{% endif %}
+    enableHttps: {{ ENABLE_HTTPS }}
+{%- endif %}
 
-{% if not properties['serviceAccount'] %}
+{%- if not properties['serviceAccount'] %}
 - name: service-account
   type: service-account.jinja
   properties:
     baseName: {{ BASE_NAME }}
-{% endif %}
+{%- endif %}
 
-{% if properties['createStorageBucket'] %}
+{%- if properties['createStorageBucket'] %}
 - name: storage
   type: storage.jinja
   properties:
     baseName: {{ BASE_NAME }}
     zone: {{ properties['zone'] }}
-{% endif %}
+{%- endif %}
 
 - name: vm
   type: virtual-machine.jinja
@@ -51,18 +58,24 @@ resources:
     baseName: {{ BASE_NAME }}
     zone: {{ properties['zone'] }}
     teamcityVersion: {{ properties['version'] }}
-{% if properties['network'] %}
+    ipAddress: {{ properties['ipAddress'] }}
+    enableHttps: {{ ENABLE_HTTPS }}
+{%- if ENABLE_HTTPS %}
+    domainName: {{ properties['domainName'] }}
+    domainOwnerEmail: {{ properties['domainOwnerEmail'] }}
+{%- endif %}
+{%- if properties['network'] %}
     network: {{ properties['network'] }}
-{% else %}
+{%- else %}
     network: $(ref.network.name)
-{% endif %}
+{%- endif %}
     subnetwork: {{ properties['subnetwork'] }}
     size: {{ properties['installationSize'] }}
-{% if properties['serviceAccount'] %}
+{%- if properties['serviceAccount'] %}
     serviceAccount: {{ properties['serviceAccount'] }}
-{% else %}
+{%- else %}
     serviceAccount: $(ref.service-account.email)
-{% endif %}
+{%- endif %}
     database:
       instance: $(ref.database.instance)
       name: $(ref.database.name)
@@ -75,7 +88,15 @@ resources:
   type: waiter.jinja
   properties:
     baseName: {{ BASE_NAME }}
+    ipAddress: $(ref.vm.ip)
+    enableHttps: {{ ENABLE_HTTPS }}
 
 outputs:
 - name: teamcityUrl
-  value: http://$(ref.vm.ip)/
+{%- if ENABLE_HTTPS %}
+  value: https://{{ properties['domainName'] }}
+{%- else %}
+  value: http://$(ref.vm.ip)
+{%- endif %}
+- name: teamcityIpAddress
+  value: $(ref.vm.ip)

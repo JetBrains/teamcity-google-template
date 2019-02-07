@@ -74,6 +74,20 @@ properties:
     x-googleProperty:
       type: GCE_NETWORK
 
+  ipAddress:
+    type: string
+    description: External IP address to attach to TeamCity server
+
+  domainName:
+    type: string
+    description: Domain name for TeamCity server
+
+  domainOwnerEmail:
+    type: string
+    description: E-mail address of domain owner used while issuing SSL certificate for TeamCity server
+
 outputs:
   teamcityUrl:
+    type: string
+  teamcityIpAddress:
     type: string
