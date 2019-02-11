@@ -308,13 +308,16 @@ resources:
 
                 [Service]
                 TimeoutStartSec=1200s
+                ExecStartPre=/bin/mkdir -p /opt/domains/certs
+                ExecStartPre=/bin/mkdir -p /opt/domains/vhost.d
+                ExecStartPre=/bin/mkdir -p /opt/domains/nginx/html
                 ExecStartPre=/usr/bin/docker pull {{ NGINX_IMAGE }}
                 ExecStart=/usr/bin/docker run \
                   -p 80:80 \
                   -p 443:443 \
-                  -v /etc/nginx/certs \
-                  -v /etc/nginx/vhost.d \
-                  -v /usr/share/nginx/html \
+                  -v /opt/domains/certs:/etc/nginx/certs:ro \
+                  -v /opt/domains/vhost.d:/etc/nginx/vhost.d \
+                  -v /opt/domains/nginx/html:/usr/share/nginx/html \
                   -v /var/run/docker.sock:/tmp/docker.sock:ro \
                   --name {{ NGINX }} \
                   {{ NGINX_IMAGE }}
@@ -337,6 +340,7 @@ resources:
                 TimeoutStartSec=1200s
                 ExecStartPre=/usr/bin/docker pull {{ LETSENCRYPT_IMAGE }}
                 ExecStart=/usr/bin/docker run \
+                  -v /opt/domains/certs:/etc/nginx/certs:rw \
                   --volumes-from {{ NGINX }} \
                   -v /var/run/docker.sock:/var/run/docker.sock:ro \
                   --name {{ LETSENCRYPT }} \
