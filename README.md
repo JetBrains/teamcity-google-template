@@ -14,7 +14,9 @@ Please use the [IAM console](https://console.cloud.google.com/iam-admin/iam/proj
 To do it, use the following command:
 
 ```sh
-> gcloud projects add-iam-policy-binding $(gcloud config get-value project) --member serviceAccount:$(gcloud projects describe $(gcloud config get-value project) --format="value(projectNumber)")@cloudservices.gserviceaccount.com --role roles/owner
+> gcloud projects add-iam-policy-binding $(gcloud config get-value project) \
+  --member serviceAccount:$(gcloud projects describe $(gcloud config get-value project) \
+  --format="value(projectNumber)")@cloudservices.gserviceaccount.com --role roles/owner
 ```
 
 ### Google Cloud APIs
@@ -28,7 +30,8 @@ Ensure that you have enabled the following Google Cloud APIs in your project:
 To do it, use the following command:
 
 ```sh
-> gcloud services enable deploymentmanager.googleapis.com sqladmin.googleapis.com iam.googleapis.com cloudresourcemanager.googleapis.com runtimeconfig.googleapis.com
+> gcloud services enable deploymentmanager.googleapis.com sqladmin.googleapis.com iam.googleapis.com \
+  cloudresourcemanager.googleapis.com runtimeconfig.googleapis.com
 ```
 
 ## Deployment
@@ -38,7 +41,9 @@ To do it, use the following command:
 The easiest and **not secure** way to create test TeamCity deployment is to execute the following command:
 
 ```sh
-> gcloud deployment-manager deployments create <deploymentName> --template https://raw.githubusercontent.com/JetBrains/teamcity-google-template/master/teamcity.jinja --properties zone:<zone>
+> gcloud deployment-manager deployments create <deploymentName> \
+  --template https://raw.githubusercontent.com/JetBrains/teamcity-google-template/master/teamcity.jinja \
+  --properties zone:<zone>
 ```
 
 Where `<deploymentName>` should be unique name for deployment, e.g. "teamcity" and `<zone>` is set to one of the [zones](https://cloud.google.com/compute/docs/regions-zones/). To list available zones execute the following command:
@@ -57,7 +62,9 @@ To create a production ready TeamCity deployment you need to have a domain name 
 2. Create a new TeamCity deployment:
 
 ```sh
-> gcloud deployment-manager deployments create <deploymentName> --template https://raw.githubusercontent.com/JetBrains/teamcity-google-template/master/teamcity.jinja --properties zone:<zone>,ipAddress:<ipAddress>,domainName:<domainName>,domainOwnerEmail:<domainOwnerEmail>
+> gcloud deployment-manager deployments create <deploymentName> \
+  --template https://raw.githubusercontent.com/JetBrains/teamcity-google-template/master/teamcity.jinja \
+  --properties zone:<zone>,ipAddress:<ipAddress>,domainName:<domainName>,domainOwnerEmail:<domainOwnerEmail>
 ```
 
 Where `<deploymentName>` should be unique name for deployment, e.g. "teamcity", `<zone>` is set to one of the [zones](https://cloud.google.com/compute/docs/regions-zones/), `<ipAddress>` is set to the external IP address, `<domainName>` is set to your domain name and optional `<domainOwnerEmail>` is set to your e-mail to be notified in case of problems with SSL certificate retrieval.
@@ -98,7 +105,9 @@ The list of pre-configured installation types:
 To change the TeamCity version, start the deployment script with the required version number and then execute the [Reset](https://cloud.google.com/compute/docs/instances/restarting-an-instance) action on the TeamCity GCE instance:
  
 ```sh
-> gcloud deployment-manager deployments update teamcity --template https://raw.githubusercontent.com/JetBrains/teamcity-google-template/master/teamcity.jinja --properties zone:<zone>,version:2017.2.2
+> gcloud deployment-manager deployments update teamcity \
+  --template https://raw.githubusercontent.com/JetBrains/teamcity-google-template/master/teamcity.jinja \
+  --properties zone:<zone>,version:<version>
 ```
 
 **Note**: The `zone` parameter cannot be changed during the deployment update.
