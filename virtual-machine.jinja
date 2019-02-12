@@ -311,7 +311,6 @@ resources:
                 ExecStartPre=/bin/mkdir -p /opt/domains/certs
                 ExecStartPre=/bin/mkdir -p /opt/domains/vhost.d
                 ExecStartPre=/bin/mkdir -p /opt/domains/nginx/html
-                ExecStartPre=/usr/bin/docker pull {{ NGINX_IMAGE }}
                 ExecStart=/usr/bin/docker run \
                   -p 80:80 \
                   -p 443:443 \
@@ -321,7 +320,8 @@ resources:
                   -v /var/run/docker.sock:/tmp/docker.sock:ro \
                   --name {{ NGINX }} \
                   {{ NGINX_IMAGE }}
-                ExecStop=-/usr/bin/docker rm -f {{ NGINX }}
+                  ExecStop=-/usr/bin/docker stop {{ NGINX }}
+                  ExecStopPost=-/usr/bin/docker rm {{ NGINX }}
                 Restart=always
 
                 [Install]
@@ -338,14 +338,14 @@ resources:
 
                 [Service]
                 TimeoutStartSec=1200s
-                ExecStartPre=/usr/bin/docker pull {{ LETSENCRYPT_IMAGE }}
                 ExecStart=/usr/bin/docker run \
                   -v /opt/domains/certs:/etc/nginx/certs:rw \
                   --volumes-from {{ NGINX }} \
                   -v /var/run/docker.sock:/var/run/docker.sock:ro \
                   --name {{ LETSENCRYPT }} \
                   {{ LETSENCRYPT_IMAGE }}
-                ExecStop=-/usr/bin/docker rm -f {{ LETSENCRYPT }}
+                ExecStop=-/usr/bin/docker stop {{ LETSENCRYPT_IMAGE }}
+                ExecStopPost=-/usr/bin/docker rm {{ LETSENCRYPT_IMAGE }}
                 Restart=always
 
                 [Install]
