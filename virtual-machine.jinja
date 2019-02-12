@@ -96,7 +96,7 @@ resources:
           - path: "/etc/teamcity/database.properties"
             content: |
               connectionProperties.user={{ properties['database']['user'] }}
-              connectionUrl=jdbc:mysql://google/{{ properties['database']['name'] }}?cloudSqlInstance={{ env['project'] }}:{{ REGION }}:{{ properties['database']['instance'] }}&socketFactory=com.google.cloud.sql.mysql.SocketFactory
+              connectionUrl=jdbc:mysql://google/{{ properties['database']['name'] }}?cloudSqlInstance={{ env['project'] }}:{{ REGION }}:{{ properties['database']['instance'] }}&socketFactory=com.google.cloud.sql.mysql.SocketFactory&useSSL=false
           - path: "/etc/teamcity/disabled-plugins.xml"
             content: |
               <?xml version="1.0" encoding="UTF-8"?>
