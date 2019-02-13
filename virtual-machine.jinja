@@ -95,8 +95,13 @@ resources:
               TEAMCITY_VERSION={{ properties['teamcityVersion'] }}
           - path: "/etc/teamcity/database.properties"
             content: |
-              connectionProperties.user={{ properties['database']['user'] }}
+              # Database: MySQL
+
               connectionUrl=jdbc:mysql://google/{{ properties['database']['name'] }}?cloudSqlInstance={{ env['project'] }}:{{ REGION }}:{{ properties['database']['instance'] }}&socketFactory=com.google.cloud.sql.mysql.SocketFactory&useSSL=false
+              connectionProperties.user={{ properties['database']['user'] }}
+
+              maxConnections=50
+              testOnBorrow=true
           - path: "/etc/teamcity/disabled-plugins.xml"
             content: |
               <?xml version="1.0" encoding="UTF-8"?>
