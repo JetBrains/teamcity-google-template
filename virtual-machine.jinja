@@ -306,18 +306,36 @@ resources:
                 WantedBy=multi-user.target
 
 {%- if properties['enableHttps'] %}
+            - name: "{{ NGINX }}-directories.service"
+              enable: true
+              content: |
+                [Unit]
+                Before={{ NGINX }}.service
+                After=mnt-data.mount docker.service
+                Requires=mnt-data.mount docker.service
+                ConditionPathExists=!/opt/domains/vhost.d/default
+
+                [Service]
+                Type=oneshot
+                ExecStart=/bin/mkdir -p /opt/domains/certs
+                ExecStart=/bin/mkdir -p /opt/domains/vhost.d
+                ExecStart=/bin/mkdir -p /opt/domains/nginx/html
+                ExecStart=/bin/sh -c "echo 'proxy_read_timeout     1200;' >> /opt/domains/vhost.d/default"
+                ExecStart=/bin/sh -c "echo 'proxy_connect_timeout  240;'  >> /opt/domains/vhost.d/default"
+                ExecStart=/bin/sh -c "echo 'client_max_body_size   0;'    >> /opt/domains/vhost.d/default"
+
+                [Install]
+                WantedBy=multi-user.target
+
             - name: "{{ NGINX }}.service"
               command: "start"
               content: |
                 [Unit]
                 Description=NGINX reverse proxy
-                Requires=docker.service
+                Requires=docker.service {{ NGINX }}-directories.service
 
                 [Service]
                 TimeoutStartSec=1200s
-                ExecStartPre=/bin/mkdir -p /opt/domains/certs
-                ExecStartPre=/bin/mkdir -p /opt/domains/vhost.d
-                ExecStartPre=/bin/mkdir -p /opt/domains/nginx/html
                 ExecStart=/usr/bin/docker run \
                   -p 80:80 \
                   -p 443:443 \
