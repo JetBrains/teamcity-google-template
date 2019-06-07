@@ -40,14 +40,7 @@ properties:
   version:
     description: The version of TeamCity
     type: string
-    default: 2019.1
-    enum:
-    - 2019.1
-    - 2018.2.4
-    - 2018.2.3
-    - 2018.2.2
-    - 2018.2.1
-    - 2018.2
+    default: "2019.1"
 
   installationSize:
     description: The size of installation
