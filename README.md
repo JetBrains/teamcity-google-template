@@ -78,7 +78,7 @@ During deployment will be created TeamCity server deployment with [auto-retrieva
 It is possible to specify the following list of comma-separated `--properties` list for your deployment:
 
 * `zone` - the [zone](https://cloud.google.com/compute/docs/regions-zones/) in which this deployment will run.
-* `version` - the [TeamCity version](https://www.jetbrains.com/teamcity/download/) to be deployed.
+* `version` - the [TeamCity version](https://www.jetbrains.com/teamcity/download/) to be deployed. The properties are parsed as YAML values, so if you are specifying a major release version, put escaped single quotes around the value, e.g. `\'2019.1\'`.
 * `installationSize` - the size of the installation: small/medium/large.
 * `serviceAccount` - the e-mail of the service account specified for the TeamCity GCE instance.
 * `createStorageBucket` - allows creating a storage bucket to store build artifacts.
