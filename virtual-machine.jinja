@@ -411,6 +411,7 @@ resources:
         initializeParams:
           diskName: {{ BASE_NAME }}-disk
           sourceImage: {{ GlobalComputeUrl('coreos-cloud', 'images', 'family/coreos-stable') }}
+          diskSizeGb: 14
       - deviceName: {{ BASE_NAME }}-data
         type: PERSISTENT
         autoDelete: true
