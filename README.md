@@ -31,7 +31,7 @@ To do it, use the following command:
 
 ```sh
 > gcloud services enable deploymentmanager.googleapis.com sqladmin.googleapis.com iam.googleapis.com \
-  cloudresourcemanager.googleapis.com runtimeconfig.googleapis.com
+  cloudresourcemanager.googleapis.com runtimeconfig.googleapis.com compute.googleapis.com
 ```
 
 ## Deployment
