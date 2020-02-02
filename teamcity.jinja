@@ -70,6 +70,7 @@ resources:
     network: $(ref.network.name)
 {%- endif %}
     subnetwork: {{ properties['subnetwork'] }}
+    ipCidrRange: {{ properties['ipCidrRange'] }}
     size: {{ properties['installationSize'] }}
 {%- if properties['serviceAccount'] %}
     serviceAccount: {{ properties['serviceAccount'] }}

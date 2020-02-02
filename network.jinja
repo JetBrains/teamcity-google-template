@@ -18,8 +18,11 @@ limitations under the License.
 resources:
 - name: {{ BASE_NAME }}
   type: compute.v1.network
+
+- name: {{BASE_NAME}}
+  type: compute.v1.subnetwork
   properties:
-    IPv4Range: 10.240.0.0/16
+    ipCidrRange: properties['ipCidrRange']
 
 - name: {{ BASE_NAME }}-allow-http
   type: compute.v1.firewall

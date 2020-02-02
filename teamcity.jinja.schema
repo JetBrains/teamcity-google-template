@@ -66,6 +66,11 @@ properties:
     x-googleProperty:
       type: GCE_NETWORK
 
+  ipCidrRange:
+    type: string
+    description: Internal IP subent range for VM(s)
+    default: 10.241.0.0/24
+
   ipAddress:
     type: string
     description: External IP address to attach to TeamCity server
