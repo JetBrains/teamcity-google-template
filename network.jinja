@@ -16,10 +16,10 @@ limitations under the License.
 {% set BASE_NAME = properties['baseName'] + '-' + env['name'] %}
 
 resources:
-- name: {{ BASE_NAME }}
+- name: {{ BASE_NAME }}-net
   type: compute.v1.network
 
-- name: {{BASE_NAME}}
+- name: {{BASE_NAME}}-subnet
   type: compute.v1.subnetwork
   properties:
     ipCidrRange: properties['ipCidrRange']
