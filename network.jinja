@@ -23,6 +23,7 @@ resources:
 - name: {{BASE_NAME}}-subnet
   type: compute.v1.subnetwork
   properties:
+    network: $(ref.{{ BASE_NAME }}.selfLink)
     ipCidrRange: properties['ipCidrRange']
     region: {{ REGION }}
     zone: properties['zone']
