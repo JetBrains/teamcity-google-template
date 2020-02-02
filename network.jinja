@@ -24,7 +24,7 @@ resources:
   type: compute.v1.subnetwork
   properties:
     ipCidrRange: properties['ipCidrRange']
-    region: {{ REGION }}
+    region: properties['region']
 
 - name: {{ BASE_NAME }}-allow-http
   type: compute.v1.firewall

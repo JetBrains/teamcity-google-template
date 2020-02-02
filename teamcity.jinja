@@ -35,6 +35,8 @@ resources:
   properties:
     baseName: {{ BASE_NAME }}
     enableHttps: {{ ENABLE_HTTPS }}
+    region: {{ properties['zone'][:-2] }}
+    ipCidrRange: properties['ipCidrRange']
 {%- endif %}
 
 {%- if not properties['serviceAccount'] %}
