@@ -14,6 +14,7 @@ limitations under the License.
 #}
 
 {% set BASE_NAME = properties['baseName'] + '-' + env['name'] %}
+{% set REGION = properties['zone'][:-2] %}
 
 resources:
 - name: {{ BASE_NAME }}-net
@@ -23,6 +24,7 @@ resources:
   type: compute.v1.subnetwork
   properties:
     ipCidrRange: properties['ipCidrRange']
+    region: {{ REGION }}
 
 - name: {{ BASE_NAME }}-allow-http
   type: compute.v1.firewall
