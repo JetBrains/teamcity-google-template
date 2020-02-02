@@ -36,13 +36,13 @@ To do it, use the following command:
 
 ## Deployment
 
-### Quick Start 
+### Quick Start
 
 The easiest and **not secure** way to create test TeamCity deployment is to execute the following command:
 
 ```sh
 > gcloud deployment-manager deployments create <deploymentName> \
-  --template https://raw.githubusercontent.com/JetBrains/teamcity-google-template/master/teamcity.jinja \
+  --template https://raw.githubusercontent.com/mesoform/teamcity-google-template/master/teamcity.jinja \
   --properties zone:<zone>
 ```
 
@@ -63,7 +63,7 @@ To create a production ready TeamCity deployment you need to have a domain name 
 
 ```sh
 > gcloud deployment-manager deployments create <deploymentName> \
-  --template https://raw.githubusercontent.com/JetBrains/teamcity-google-template/master/teamcity.jinja \
+  --template https://raw.githubusercontent.com/mesoform/teamcity-google-template/master/teamcity.jinja \
   --properties zone:<zone>,ipAddress:<ipAddress>,domainName:<domainName>,domainOwnerEmail:<domainOwnerEmail>
 ```
 
@@ -103,10 +103,10 @@ The list of pre-configured installation types:
 ## TeamCity Update
 
 To change the TeamCity version, start the deployment script with the required version number and then execute the [Reset](https://cloud.google.com/compute/docs/instances/restarting-an-instance) action on the TeamCity GCE instance:
- 
+
 ```sh
 > gcloud deployment-manager deployments update teamcity \
-  --template https://raw.githubusercontent.com/JetBrains/teamcity-google-template/master/teamcity.jinja \
+  --template https://raw.githubusercontent.com/mesoform/teamcity-google-template/master/teamcity.jinja \
   --properties zone:<zone>,version:<version>
 ```
 
