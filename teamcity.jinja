@@ -37,6 +37,7 @@ resources:
     enableHttps: {{ ENABLE_HTTPS }}
     zone: properties['zone']
     ipCidrRange: properties['ipCidrRange']
+    secureIps: properties['secureIps']
 {%- endif %}
 
 {%- if not properties['serviceAccount'] %}

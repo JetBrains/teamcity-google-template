@@ -33,7 +33,7 @@ resources:
   properties:
     network: $(ref.{{ BASE_NAME }}.selfLink)
     priority: 1000
-    sourceRanges: ["0.0.0.0/0"]
+    sourceRanges: properties['secureIps']
     allowed:
       - IPProtocol: TCP
         ports: ["80"]
@@ -46,7 +46,7 @@ resources:
   properties:
     network: $(ref.{{ BASE_NAME }}.selfLink)
     priority: 1000
-    sourceRanges: ["0.0.0.0/0"]
+    sourceRanges: properties['secureIps']
     allowed:
       - IPProtocol: TCP
         ports: ["443"]
@@ -59,7 +59,7 @@ resources:
   properties:
     network: $(ref.{{ BASE_NAME }}.selfLink)
     priority: 65534
-    sourceRanges: ["0.0.0.0/0"]
+    sourceRanges: properties['secureIps']
     allowed:
       - IPProtocol: TCP
         ports: ["22"]

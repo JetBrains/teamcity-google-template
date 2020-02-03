@@ -83,6 +83,7 @@ It is possible to specify the following list of comma-separated `--properties` l
 * `serviceAccount` - the e-mail of the service account specified for the TeamCity GCE instance.
 * `createStorageBucket` - allows creating a storage bucket to store build artifacts.
 * `ipAddress` - the preliminary created in the same region external IP address for TeamCity server.
+* `ipCidrRange` - IP CIDR range for network where server will run 
 * `domainName` - the [verified domain name](https://cloud.google.com/compute/docs/instances/create-ptr-record#domain_ownership) for TeamCity server which will be used to retrieve SSL certificate.
 * `domainOwnerEmail` - the e-mail address of domain owner used to notify about SSL certificate renewal for domain name.
 * `network` - the network name in the [same region](https://cloud.google.com/compute/docs/regions-zones/) which will be used by the TeamCity GCE instance.
