@@ -182,8 +182,8 @@ resources:
                 Type=oneshot
                 ExecStart=/bin/mkdir -p /mnt/data/teamcity-server/data/lib/jdbc
                 ExecStart=/bin/wget -O /mnt/data/teamcity-server/data/lib/jdbc/mysql-socket-factory.jar \
-                  http://central.maven.org/maven2/com/google/cloud/sql/mysql-socket-factory/{{ GOOGLE_FACTORY }}/mysql-socket-factory-{{ GOOGLE_FACTORY }}.jar
-                ExecStart=/bin/wget -O pom.xml http://central.maven.org/maven2/com/google/cloud/sql/mysql-socket-factory/{{ GOOGLE_FACTORY }}/mysql-socket-factory-{{ GOOGLE_FACTORY }}.pom
+                  https://repo.maven.apache.org/maven2/com/google/cloud/sql/mysql-socket-factory/{{ GOOGLE_FACTORY }}/mysql-socket-factory-{{ GOOGLE_FACTORY }}.jar
+                ExecStart=/bin/wget -O pom.xml https://repo.maven.apache.org/maven2/com/google/cloud/sql/mysql-socket-factory/{{ GOOGLE_FACTORY }}/mysql-socket-factory-{{ GOOGLE_FACTORY }}.pom
                 ExecStart=/bin/bash -c 'docker run --rm -v "$(pwd)":/opt/maven -v /mnt/data/teamcity-server/data/lib/jdbc:/opt/maven/target/dependency -w /opt/maven maven:alpine mvn dependency:copy-dependencies && docker rmi maven:alpine'
                 ExecStart=/bin/rm pom.xml
 
