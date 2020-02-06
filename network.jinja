@@ -17,7 +17,7 @@ limitations under the License.
 {% set REGION = properties['zone'][:-2] %}
 
 resources:
-- name: {{ BASE_NAME }}-net
+- name: {{ BASE_NAME }}
   type: compute.v1.network
 
 - name: {{BASE_NAME}}-subnet
