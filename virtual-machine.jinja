@@ -426,7 +426,7 @@ resources:
           natIP: $(ref.{{ BASE_NAME }}-address.address)
 {%- endif %}
         network: {{ GlobalComputeUrl(env['project'], 'networks', properties['network']) }}
-        subnetwork: {{ RegionalComputeUrl(env['project'], REGION, 'subnetworks', BASE_NAME) }}
+        subnetwork: {{ RegionalComputeUrl(env['project'], REGION, 'subnetworks', BASE_NAME + '-subnet') }}
     tags:
       items:
         - http-server
