@@ -36,6 +36,10 @@ To do it, use the following command:
   cloudresourcemanager.googleapis.com runtimeconfig.googleapis.com
 ```
 
+### Flatcar Container Linux Image
+
+The Flatcar Container Linux image is not published to Google Cloud, so in order to use it you will have to publish it to your project. Follow the [official guide](https://docs.flatcar-linux.org/os/booting-on-google-compute-engine/#uploading-an-image).
+
 ## Deployment
 
 ### Quick Start 

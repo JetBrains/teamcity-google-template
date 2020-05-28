@@ -31,9 +31,9 @@ resources:
     parent: $(ref.{{ BASE_NAME }}-config.name)
     waiter: {{ BASE_NAME }}-software
 {%- if properties['enableHttps'] %}
-    timeout: 1800s
+    timeout: 3600s
 {%- else %}
-    timeout: 600s
+    timeout: 3600s
 {%- endif %}
     success:
       cardinality:
