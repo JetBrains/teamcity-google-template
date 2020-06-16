@@ -18,7 +18,7 @@ To do it, use the following command:
 ```sh
 > gcloud projects add-iam-policy-binding $(gcloud config get-value project) \
   --member serviceAccount:$(gcloud projects describe $(gcloud config get-value project) \
-  --format="value(<projectNumber>)")@cloudservices.gserviceaccount.com --role roles/owner
+  --format="value(projectNumber)")@cloudservices.gserviceaccount.com --role roles/owner
 ```
 
 ### Google Cloud APIs
@@ -33,7 +33,7 @@ To do it, use the following command:
 
 ```sh
 > gcloud services enable deploymentmanager.googleapis.com sqladmin.googleapis.com iam.googleapis.com \
-  cloudresourcemanager.googleapis.com runtimeconfig.googleapis.com
+  cloudresourcemanager.googleapis.com runtimeconfig.googleapis.com compute.googleapis.com
 ```
 
 ### Flatcar Container Linux Image
