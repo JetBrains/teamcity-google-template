@@ -369,8 +369,8 @@ resources:
                   -v /var/run/docker.sock:/var/run/docker.sock:ro \
                   --name {{ LETSENCRYPT }} \
                   {{ LETSENCRYPT_IMAGE }}
-                ExecStop=-/usr/bin/docker stop {{ LETSENCRYPT_IMAGE }}
-                ExecStopPost=-/usr/bin/docker rm {{ LETSENCRYPT_IMAGE }}
+                ExecStop=-/usr/bin/docker stop {{ LETSENCRYPT }}
+                ExecStopPost=-/usr/bin/docker rm {{ LETSENCRYPT }}
                 Restart=always
 
                 [Install]
