@@ -1,5 +1,4 @@
 # TeamCity Google Cloud Deployment Manager template
-[![official project](http://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 
 **NOTE**: This is for illustrative purposes only and is not intended to be used to create a production-ready deployment of TeamCity.
 
