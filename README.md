@@ -1,4 +1,6 @@
-# TeamCity Google Cloud Deployment Manager template
+[![obsolete JetBrains project](https://jb.gg/badges/obsolete-flat-square.svg)](https://github.com/JetBrains#jetbrains-on-github)
+
+# TeamCity Google Cloud Deployment Manager template 
 
 **NOTE**: This is for illustrative purposes only and is not intended to be used to create a production-ready deployment of TeamCity.
 
